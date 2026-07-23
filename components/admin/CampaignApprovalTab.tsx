@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   ClipboardList,
   Search,
@@ -14,7 +14,6 @@ import {
   MessageSquare,
   FileText,
   Filter,
-  Send,
   ArrowRight,
   Eye,
   RotateCcw,
@@ -25,6 +24,8 @@ import {
   X,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { missionStore } from '@/lib/missionStore'
+import type { Mission } from '@/lib/mock/missions'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -768,6 +769,35 @@ function ApprovalKPI({ requests }: { requests: CampaignRequest[] }) {
   )
 }
 
+const missionToRequest = (m: Mission): CampaignRequest => ({
+  id: m.id,
+  title: m.title,
+  missionary: m.missionaryName,
+  email: 'pending@ywamfund.local',
+  phone: '-',
+  country: m.country,
+  organization: m.organization,
+  goalAmount: m.goalAmount,
+  duration: m.daysLeft,
+  description: m.body || m.subtitle,
+  submittedAt: new Date(m.createdAt).toLocaleString('ko-KR', { hour12: false }),
+  stage: 'submitted',
+  handlerName: null,
+  approverName: null,
+  finalApproverName: null,
+  history: [
+    {
+      id: `h-${m.id}-1`,
+      stage: 'submitted',
+      action: 'submitted',
+      actor: m.missionaryName,
+      actorRole: '선교사',
+      comment: '캠페인 등록 신청 (D1 mock store)',
+      timestamp: new Date(m.createdAt).toLocaleString('ko-KR', { hour12: false }),
+    },
+  ],
+})
+
 // ─── Main component ────────────────────────────────────────────────────────────
 
 export function CampaignApprovalTab() {
@@ -776,6 +806,22 @@ export function CampaignApprovalTab() {
   const [search, setSearch] = useState('')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    const syncPending = () => {
+      const pending = missionStore.getPending().map(missionToRequest)
+      setRequests((prev) => {
+        const withoutStorePending = prev.filter(
+          (r) => !r.id.startsWith('m-') || r.stage === 'approved' || r.stage === 'rejected',
+        )
+        const existingIds = new Set(withoutStorePending.map((r) => r.id))
+        const fresh = pending.filter((p) => !existingIds.has(p.id))
+        return [...fresh, ...withoutStorePending]
+      })
+    }
+    syncPending()
+    return missionStore.subscribe(syncPending)
+  }, [])
 
   const selected = requests.find(r => r.id === selectedId) ?? null
 
@@ -820,7 +866,30 @@ export function CampaignApprovalTab() {
       }
 
       if (action === 'reject') {
+        if (id.startsWith('m-')) missionStore.reject(id)
         return { ...r, stage: 'rejected' as ApprovalStage, history: [...r.history, newEntry] }
+      }
+
+      // D1 store missions: one-step publish to home
+      if (action === 'approve' && id.startsWith('m-')) {
+        missionStore.publish(id)
+        return {
+          ...r,
+          stage: 'approved' as ApprovalStage,
+          history: [
+            ...r.history,
+            newEntry,
+            {
+              id: `h${r.history.length + 2}`,
+              stage: 'approved' as ApprovalStage,
+              action: 'registered' as const,
+              actor: '이시스템',
+              actorRole: '시스템',
+              comment: '캠페인이 플랫폼에 등록되어 공개되었습니다.',
+              timestamp: now,
+            },
+          ],
+        }
       }
 
       // approve → advance stage
@@ -830,6 +899,7 @@ export function CampaignApprovalTab() {
       const extraEntries: HistoryEntry[] = [newEntry]
 
       if (nextStage === 'approved') {
+        if (missionStore.getById(id)) missionStore.publish(id)
         extraEntries.push({
           id: `h${r.history.length + 2}`,
           stage: 'approved',

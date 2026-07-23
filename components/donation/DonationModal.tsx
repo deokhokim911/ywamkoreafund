@@ -29,7 +29,16 @@ function formatKRW(amount: number): string {
 
 const STEPS: Step[] = ['amount', 'info', 'payment', 'success']
 
-export function DonationModal({ open, missionTitle, missionaryName, onClose }: DonationModalProps) {
+export function DonationModal(props: DonationModalProps) {
+  if (!props.open) return null
+  return <DonationModalContent {...props} />
+}
+
+const DonationModalContent = ({
+  missionTitle,
+  missionaryName,
+  onClose,
+}: DonationModalProps) => {
   const [step, setStep] = useState<Step>('amount')
   const [donationType, setDonationType] = useState<DonationType>('monthly')
   const [selectedAmount, setSelectedAmount] = useState<number>(30_000)
@@ -45,17 +54,8 @@ export function DonationModal({ open, missionTitle, missionaryName, onClose }: D
     ? parseInt(customAmount.replace(/[^0-9]/g, ''), 10) || 0
     : selectedAmount
 
-  // Reset on open
-  useEffect(() => {
-    if (open) {
-      setStep('amount')
-      setIsLoading(false)
-    }
-  }, [open])
-
   // Trap focus / close on Escape
   useEffect(() => {
-    if (!open) return
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
     }
@@ -65,12 +65,9 @@ export function DonationModal({ open, missionTitle, missionaryName, onClose }: D
       document.removeEventListener('keydown', handleKey)
       document.body.style.overflow = ''
     }
-  }, [open, onClose])
-
-  if (!open) return null
+  }, [onClose])
 
   const stepIndex = STEPS.indexOf(step)
-  const progressPercent = ((stepIndex) / (STEPS.length - 1)) * 100
 
   const stepLabels: Record<Step, string> = {
     amount: '금액 선택',
@@ -324,7 +321,7 @@ export function DonationModal({ open, missionTitle, missionaryName, onClose }: D
 
               {/* Anonymous option note */}
               <p className="text-xs text-muted-foreground bg-muted rounded-xl p-3.5">
-                후원자 이름은 미션 페이지에 "홍○○님" 형태로 표시됩니다. 익명으로 후원하려면 이름을 "익명"으로 입력하세요.
+                후원자 이름은 미션 페이지에 「홍○○님」 형태로 표시됩니다. 익명으로 후원하려면 이름을 「익명」으로 입력하세요.
               </p>
 
               <button

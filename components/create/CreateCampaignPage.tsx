@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { Navbar } from '../layout/Navbar'
 import { cn } from '@/lib/utils'
+import { missionStore } from '@/lib/missionStore'
 
 // ─── Step definitions ───────────────────────────────────────────
 const STEPS = [
@@ -562,6 +563,22 @@ export function CreateCampaignPage() {
   }
 
   const handleSubmit = () => {
+    const org =
+      data.organization === '기타 (직접 입력)'
+        ? data.organizationCustom || data.organization
+        : data.organization
+
+    missionStore.createPending({
+      title: data.title,
+      subtitle: data.subtitle,
+      body: data.body,
+      country: data.country,
+      missionaryName: data.missionaryName,
+      organization: org,
+      goalAmount: Number(data.goalAmount) || 0,
+      coverImage: data.coverImagePreview || '/mission-cover.png',
+      sentYear: data.deployYear ? Number(data.deployYear) : undefined,
+    })
     setSubmitted(true)
   }
 

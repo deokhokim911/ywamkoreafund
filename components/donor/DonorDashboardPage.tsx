@@ -360,7 +360,7 @@ export function DonorDashboardPage() {
                 />
                 <Tooltip
                   contentStyle={{ borderRadius: '0.75rem', border: '1px solid oklch(0.91 0 0)', fontSize: 12 }}
-                  formatter={(v: number) => [`${(v / 10_000).toLocaleString()}만원`, '후원금']}
+                  formatter={(v) => [`${(Number(v ?? 0) / 10_000).toLocaleString()}만원`, '후원금']}
                 />
                 <Area
                   type="monotone"

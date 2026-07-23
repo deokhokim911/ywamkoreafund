@@ -472,7 +472,7 @@ export function AdminPage() {
                     <YAxis tick={{ fontSize: 11, fill: 'oklch(0.50 0 0)' }} axisLine={false} tickLine={false}
                       tickFormatter={(v) => chartView === 'amount' ? `${v / 10_000}만` : `${v}`} />
                     <Tooltip contentStyle={{ borderRadius: '0.75rem', border: '1px solid oklch(0.91 0 0)', fontSize: 12 }}
-                      formatter={(v: number) => chartView === 'amount' ? [`${(v / 10_000).toLocaleString()}만원`, '모금액'] : [`${v.toLocaleString()}명`, '후원자']} />
+                      formatter={(v) => chartView === 'amount' ? [`${(Number(v ?? 0) / 10_000).toLocaleString()}만원`, '모금액'] : [`${Number(v ?? 0).toLocaleString()}명`, '후원자']} />
                     <Area type="monotone" dataKey={chartView === 'amount' ? 'amount' : 'donors'} stroke="oklch(0.52 0.12 195)" strokeWidth={2.5} fill="url(#colorPrimary)" dot={{ r: 3, fill: 'oklch(0.52 0.12 195)', strokeWidth: 0 }} activeDot={{ r: 5 }} />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -611,7 +611,7 @@ export function AdminPage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.91 0 0)" vertical={false} />
                   <XAxis dataKey="country" tick={{ fontSize: 12, fill: 'oklch(0.50 0 0)' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 11, fill: 'oklch(0.50 0 0)' }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v / 10_000}만`} />
-                  <Tooltip contentStyle={{ borderRadius: '0.75rem', border: '1px solid oklch(0.91 0 0)', fontSize: 12 }} formatter={(v: number) => [`${(v / 10_000).toLocaleString()}만원`, '누적 모금액']} />
+                  <Tooltip contentStyle={{ borderRadius: '0.75rem', border: '1px solid oklch(0.91 0 0)', fontSize: 12 }} formatter={(v) => [`${(Number(v ?? 0) / 10_000).toLocaleString()}만원`, '누적 모금액']} />
                   <Bar dataKey="amount" fill="oklch(0.52 0.12 195)" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>

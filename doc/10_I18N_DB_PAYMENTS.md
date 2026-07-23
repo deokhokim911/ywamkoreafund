@@ -2,7 +2,7 @@
 
 > **목적:** ko/en 다국어 기반, Postgres 호스팅, 결제 제공자 선택 근거와 **확정 사항**을 기록한다.  
 > **작성일:** 2026-07-21  
-> **개정:** 2026-07-21 — **1차 결제=Toss · 호스팅 DB=Supabase 확정** (대안·비교는 아래 유지)
+> **개정:** 2026-07-23 — **D0부터 Supabase를 기본 DB로 사용** ([09](./09_DEVELOPMENT_PHASES.md)). Docker는 오프라인 선택.
 
 ---
 
@@ -11,19 +11,20 @@
 | 영역 | 확정 | 일자 | 비고 |
 |------|------|------|------|
 | **1차 결제 (Phase 1 / D2)** | **토스페이먼츠 (Toss Payments)** | 2026-07-21 | 일시·정기(빌링키), KRW. 해외카드는 Toss 계약 범위 내 |
-| **호스팅 DB (스테이징·프로덕션)** | **Supabase (PostgreSQL)** | 2026-07-21 | Drizzle + `DATABASE_URL`. **Supabase Auth 미사용** (Better Auth 유지) |
-| **로컬 개발 DB** | **Docker Postgres** | (권고 유지) | 오프라인·재현성. 스키마는 호스팅과 동일 migrate |
+| **호스팅 DB (개발·스테이징·프로덕션)** | **Supabase (PostgreSQL)** | 2026-07-21 · **D0부터 연결** 2026-07-23 | Drizzle + `DATABASE_URL`. **Supabase Auth 미사용** (Better Auth 유지) |
+| **로컬 개발 DB (선택)** | **Docker Postgres** | (선택) | 오프라인·재현성. 기본 경로는 아님 — 스키마는 동일 migrate |
 | **국제 결제 (Phase 2 / D5)** | **Stripe 후보 유지** — 아직 미도입 | — | 비교·추상화는 §3 유지. 도입 시점은 T-19 |
 | **i18n** | next-intl · `ko` 기본 · `en` | (권고=진행 방향) | D0부터 기반 ([09](./09_DEVELOPMENT_PHASES.md)) |
 
 **구현 함의**
 
 ```text
-개발     → Docker Postgres + DATABASE_URL(local)
-스테이징 → Supabase project connection string
-프로덕션 → Supabase project connection string
-결제 P1  → TossProvider only (PAYMENT_PROVIDERS_ENABLED=toss)
-결제 P2  → (검토) StripeProvider 추가 — 기존 비교·인터페이스 삭제하지 않음
+개발(기본) → Supabase staging/dev project + DATABASE_URL (DB_PROVIDER=supabase)  ← D0부터
+개발(선택) → Docker Postgres + DATABASE_URL(local) (DB_PROVIDER=local)
+스테이징   → Supabase project connection string
+프로덕션   → Supabase project connection string
+결제 P1    → TossProvider only (PAYMENT_PROVIDERS_ENABLED=toss)
+결제 P2    → (검토) StripeProvider 추가 — 기존 비교·인터페이스 삭제하지 않음
 ```
 
 아래 §2·§3의 **비교표·대안(VPS Postgres, Stripe 등)은 의사결정 이력으로 보존**한다.  
@@ -79,8 +80,8 @@
 
 | 환경 | 선택 |
 |------|------|
-| 로컬 개발 | Docker Postgres |
-| 스테이징 · 프로덕션 | **Supabase PostgreSQL** (`DATABASE_URL`) |
+| 개발 (기본) · 스테이징 · 프로덕션 | **Supabase PostgreSQL** (`DATABASE_URL`) — **D0부터** |
+| 로컬 오프라인 (선택) | Docker Postgres |
 | Auth | Better Auth only — **Supabase Auth 사용 안 함** |
 | (검토했으나 미채택) | VPS/Linode 자체 Postgres — 아래 비교 참고, TheSentAsset형 대안 |
 
@@ -88,7 +89,7 @@
 
 | 관점 | 로컬 Postgres (Docker / 설치형) | Supabase (호스팅 Postgres) | VPS/Managed Postgres (대안) |
 |------|--------------------------------|----------------------------|------------------------------|
-| **역할(확정 후)** | **개발 표준** | **스테이징·프로덕션 채택** | 미채택(이력) — TheSentAsset과 동일 운영 시 재검토 가능 |
+| **역할(확정 후)** | **오프라인·선택** | **개발·스테이징·프로덕션 기본 (D0~)** | 미채택(이력) — TheSentAsset과 동일 운영 시 재검토 가능 |
 | **개발 DX** | `docker compose up` 오프라인·재현 | 클라우드 + CLI | SSH·자체 백업 |
 | **비용** | 로컬 무료 | Free/Pro 티어 | VPS 고정비 |
 | **백업·PITR** | 직접 구성 | 대시보드 PITR(플랜별) | 직접 또는 매니지드 |
@@ -100,7 +101,8 @@
 ### 2.2 확정 아키텍처
 
 ```text
-개발(모든 개발자)     →  Docker Postgres (로컬) + DATABASE_URL
+개발(기본, D0~)       →  Supabase (dev/staging) + DATABASE_URL
+개발(선택·오프라인)   →  Docker Postgres + DATABASE_URL(local)
 스테이징 / 프로덕션   →  Supabase Postgres (connection string만)
                          Auth/Realtime/Data API: 사용하지 않음
                          Storage: 선택 (S3-compatible 추상화 유지 시 교체 가능)
@@ -118,15 +120,15 @@
 ### 2.3 Drizzle 관점
 
 - `drizzle.config.ts`의 `DATABASE_URL`만 환경별로 교체.  
-- 로컬: `pnpm db:migrate` → Docker.  
-- Supabase: 동일 migrate → 프로젝트 DB. 대시보드 SQL은 **비상용**.
+- **기본:** `pnpm db:migrate` → **Supabase** (D0 스모크부터).  
+- **선택:** 동일 migrate → Docker. 대시보드 SQL은 **비상용**.
 
 ### 2.4 결정 상태
 
 | ID | 내용 | 상태 |
 |----|------|------|
 | T-18 | 프로덕션 DB = **Supabase** | ✅ **확정** (2026-07-21). 대안 B(VPS)는 이력으로 보존 |
-| — | 개발 = Docker Postgres | ✅ 유지 |
+| — | 개발 기본 = Supabase · Docker = 선택 | ✅ **2026-07-23** ([09](./09_DEVELOPMENT_PHASES.md) D0) |
 
 ---
 
@@ -198,7 +200,7 @@ DonationModal
 | 요구 | 검토 이력 | **확정 후** |
 |------|-----------|-------------|
 | i18n | D4 몰아넣기안 폐기 | D0 스캐폴딩 → D1 핵심 키 → D4 QA |
-| DB | A Supabase / B VPS 병기 | **개발 Docker · 호스팅 Supabase** (B는 이력) |
+| DB | A Supabase / B VPS 병기 | **D0부터 Supabase 기본** · Docker 선택 (B는 이력) |
 | 결제 | Toss vs Stripe 병기 | **D2 Toss 확정** · Provider로 Stripe 자리 유지 · D5 후보 |
 
 상세 작업 ID: [09](./09_DEVELOPMENT_PHASES.md).
@@ -209,7 +211,7 @@ DonationModal
 
 | 변수 | 용도 |
 |------|------|
-| `DATABASE_URL` | 로컬 Docker **또는** Supabase connection string |
+| `DATABASE_URL` | **기본 = Supabase** connection string · 선택 시 Docker |
 | `DB_PROVIDER` | `local` \| `supabase` (문서·스크립트; 프로덕션은 `supabase`) |
 | `NEXT_PUBLIC_SUPABASE_URL` | (선택) Storage 등 사용 시에만 — DB만 쓰면 불필요 |
 | `NEXT_PUBLIC_DEFAULT_LOCALE` | `ko` |

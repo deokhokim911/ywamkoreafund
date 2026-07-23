@@ -1,0 +1,68 @@
+{
+  "nav": {
+    "home": "Home",
+    "my": "My giving",
+    "dashboard": "Missionary dashboard",
+    "create": "Create campaign",
+    "support": "Support",
+    "admin": "Admin",
+    "donate": "Give",
+    "mainMenu": "Main menu",
+    "localeKo": "한국어",
+    "localeEn": "English",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "demoRole": "Demo role"
+  },
+  "common": {
+    "brand": "YWAMFund",
+    "loading": "Loading…",
+    "error": "Something went wrong",
+    "retry": "Try again",
+    "close": "Close"
+  },
+  "meta": {
+    "title": "YWAMFund — Mission crowdfunding",
+    "description": "Support missionaries in their work. Become a partner through one-time or recurring gifts."
+  },
+  "home": {
+    "urgent": "Urgent",
+    "missionary": "Missionary",
+    "donorCount": "{count} donors",
+    "daysLeft": "{days} days left",
+    "progressAria": "Funding progress {percent}%",
+    "featuredTitle": "Featured missions",
+    "featuredSubtitle": "Campaigns highlighted by our team",
+    "emptyTitle": "No results found.",
+    "emptyHint": "Try a different keyword.",
+    "stats": {
+      "raised": "Total raised",
+      "raisedValue": "₩140M+",
+      "donors": "Supporters",
+      "donorsValue": "2,400+",
+      "countries": "Countries",
+      "countriesValue": "18"
+    },
+    "filters": {
+      "all": "All",
+      "urgent": "Urgent",
+      "asia": "Asia",
+      "africa": "Africa"
+    }
+  },
+  "mission": {
+    "qrTitle": "Campaign QR",
+    "qrHint": "Scan to open this public mission page.",
+    "notFoundTitle": "Mission not found"
+  },
+  "donate": {
+    "title": "Give",
+    "once": "One-time",
+    "monthly": "Monthly",
+    "next": "Next",
+    "back": "Back",
+    "pay": "Pay",
+    "success": "Thank you for your gift",
+    "close": "Done"
+  }
+}

@@ -155,9 +155,8 @@ export function WorldMapTab() {
               <Geographies geography={GEO_URL}>
                 {({ geographies }) =>
                   geographies.map((geo) => {
-                    const numId = geo.id as string
+                    const numId = String(geo.id ?? '')
                     const nameEn = COUNTRY_MAP[numId]
-                    const isSelected = nameEn === selected
                     return (
                       <Geography
                         key={geo.rsmKey}
@@ -321,10 +320,10 @@ export function WorldMapTab() {
             />
             <Tooltip
               contentStyle={{ borderRadius: '0.75rem', border: '1px solid oklch(0.91 0 0)', fontSize: 12 }}
-              formatter={(v: number) =>
+              formatter={(v) =>
                 barView === 'amount'
-                  ? [`${(v / 10_000).toLocaleString()}만원`, '누적 모금액']
-                  : [`${v}명`, '파송 선교사']
+                  ? [`${(Number(v ?? 0) / 10_000).toLocaleString()}만원`, '누적 모금액']
+                  : [`${Number(v ?? 0)}명`, '파송 선교사']
               }
             />
             <Bar dataKey={barView === 'amount' ? 'amount' : 'missionaries'} radius={[6, 6, 0, 0]}>

@@ -1,0 +1,68 @@
+{
+  "nav": {
+    "home": "홈",
+    "my": "내 후원",
+    "dashboard": "선교사 대시보드",
+    "create": "캠페인 만들기",
+    "support": "고객지원",
+    "admin": "관리자",
+    "donate": "후원하기",
+    "mainMenu": "주요 메뉴",
+    "localeKo": "한국어",
+    "localeEn": "English",
+    "openMenu": "메뉴 열기",
+    "closeMenu": "메뉴 닫기",
+    "demoRole": "데모 역할"
+  },
+  "common": {
+    "brand": "YWAMFund",
+    "loading": "불러오는 중…",
+    "error": "문제가 발생했습니다",
+    "retry": "다시 시도",
+    "close": "닫기"
+  },
+  "meta": {
+    "title": "YWAMFund — 선교 후원 플랫폼",
+    "description": "선교사들의 사역을 함께 지원하세요. 일시 또는 정기 후원으로 선교의 동역자가 되어주세요."
+  },
+  "home": {
+    "urgent": "긴급",
+    "missionary": "선교사",
+    "donorCount": "{count}명 후원",
+    "daysLeft": "{days}일 남음",
+    "progressAria": "모금 진행률 {percent}%",
+    "featuredTitle": "추천 사역",
+    "featuredSubtitle": "담당자가 선정한 주목할 캠페인",
+    "emptyTitle": "검색 결과가 없습니다.",
+    "emptyHint": "다른 키워드로 검색해 보세요.",
+    "stats": {
+      "raised": "총 모금액",
+      "raisedValue": "1억 4천만원+",
+      "donors": "후원자 수",
+      "donorsValue": "2,400명+",
+      "countries": "사역 국가",
+      "countriesValue": "18개국"
+    },
+    "filters": {
+      "all": "전체",
+      "urgent": "긴급",
+      "asia": "아시아",
+      "africa": "아프리카"
+    }
+  },
+  "mission": {
+    "qrTitle": "캠페인 QR",
+    "qrHint": "스캔하면 이 미션 공개 페이지로 이동합니다.",
+    "notFoundTitle": "미션을 찾을 수 없습니다"
+  },
+  "donate": {
+    "title": "후원하기",
+    "once": "일시 후원",
+    "monthly": "정기 후원",
+    "next": "다음",
+    "back": "이전",
+    "pay": "결제하기",
+    "success": "후원이 완료되었습니다",
+    "close": "확인"
+  }
+}

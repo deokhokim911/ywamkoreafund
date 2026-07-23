@@ -26,10 +26,11 @@
    ┌────▼────┐     ┌──────▼──────┐   ┌──────▼──────┐
    │ Postgres│     │ Object      │   │ Toss /      │
    │ Drizzle │     │ Storage     │   │ (Stripe D5) │
-   │ local:  │     │ S3-compat   │   │ Webhooks    │
-   │ Docker  │     │ or Supabase │   └─────────────┘
-   │ host:   │     │ Storage     │
-   │Supabase │     └─────────────┘
+   │ 기본:   │     │ S3-compat   │   │ Webhooks    │
+   │Supabase │     │ or Supabase │   └─────────────┘
+   │(D0~)    │     │ Storage     │
+   │선택:    │     └─────────────┘
+   │ Docker  │
    └─────────┘
 ```
 
@@ -39,7 +40,7 @@
 | UI | Tailwind 4 · CVA · lucide · shadcn(base-nova) | 프로토타입 사용 중 |
 | i18n | next-intl (`ko`/`en`) | **D0 도입** |
 | Auth | Better Auth + Kakao OAuth | **D2** |
-| DB | PostgreSQL + Drizzle | 로컬 Docker · **호스팅 Supabase ✅** |
+| DB | PostgreSQL + Drizzle | **Supabase ✅ (D0~)** · Docker는 선택 |
 | 결제 | Toss Payments (`PaymentProvider`) | **Phase 1 ✅** · Stripe는 D5 후보 |
 | 이메일 | Resend | D2~D3 |
 | 관측 | Sentry · Upstash Redis(레이트리밋) | Phase 1 필수 |
@@ -65,8 +66,8 @@
 | `pnpm build` / `start` | 프로덕션 빌드·실행 |
 | `pnpm lint` / `typecheck` | ESLint · `tsc --noEmit` |
 | `pnpm test` / `test:e2e` | Vitest · Playwright |
-| `pnpm db:up` | Docker Compose Postgres |
-| `pnpm db:migrate` / `db:studio` | drizzle-kit |
+| `pnpm db:up` | (선택) Docker Compose Postgres |
+| `pnpm db:migrate` / `db:studio` / `db:health` | drizzle-kit · **Supabase 기본** |
 | `pnpm messages:check-keys` | ko/en 키 패리티 |
 
 ---
@@ -176,10 +177,10 @@
 |------|------|------|
 | RDBMS | **PostgreSQL 16** (권장) | |
 | ORM | **Drizzle ORM** + **drizzle-kit** | 스키마 SSOT = 코드 |
-| 로컬 | **Docker Compose** Postgres | 개발 표준 |
-| 스테이징·프로덕션 | **Supabase (PostgreSQL)** ✅ | connection string |
+| 로컬 (선택) | **Docker Compose** Postgres | 오프라인용 |
+| 개발·스테이징·프로덕션 | **Supabase (PostgreSQL)** ✅ | **D0부터** connection string |
 | (이력 대안) | VPS/Linode Managed Postgres | 미채택 — [10 §2](./10_I18N_DB_PAYMENTS.md) |
-| 마이그레이션 | `drizzle-kit migrate` | 로컬·Supabase 동일 |
+| 마이그레이션 | `drizzle-kit migrate` | Supabase 기본 · Docker 동일 명령 |
 
 ### 5.2 Supabase 사용 범위 (확정)
 
@@ -293,8 +294,8 @@ src/lib/payments/
 | 계층 | 선택 |
 |------|------|
 | 앱 | VPS (Linode + PM2 + Nginx) 등 — T-13 |
-| DB | **Supabase** ✅ |
-| 로컬 DB | Docker Compose |
+| DB | **Supabase** ✅ (**D0~**) |
+| 로컬 DB (선택) | Docker Compose |
 | Cron | crontab → `/api/cron/*` |
 | 백업 | Supabase PITR + 로컬 덤프 · RPO ≤ 24h 목표 |
 | CDN | Cloudflare 등 |
@@ -316,7 +317,7 @@ Internet → Nginx(TLS) → Next.js (PM2)
 | recharts / simple-maps / lucide | ✅ | 유지 (지도 T-12) |
 | next-intl | ❌ | **D0** |
 | Better Auth · Kakao | ❌ | **D2** |
-| Drizzle · Docker · Supabase | ❌ | **D0~D2** |
+| Drizzle · **Supabase (D0~)** · Docker 선택 | ❌ | **D0~D2** |
 | Toss | ❌ (가짜 모달) | **D2** |
 | Resend · Sentry · Upstash | ❌ | D0 자리 · D2 실사용 |
 | RHF · Zod · TanStack Query | ❌ | **D2** |
@@ -357,7 +358,7 @@ Stripe 패키지는 **D5**까지 필수 아님.
 | 변수 | 필수 시기 | 용도 |
 |------|-----------|------|
 | `NEXT_PUBLIC_APP_URL` | D0 | 공개 URL · QR · OAuth |
-| `DATABASE_URL` | D0 | Docker 또는 Supabase |
+| `DATABASE_URL` | D0 | **Supabase** (기본) 또는 Docker |
 | `DB_PROVIDER` | D0 | `local` \| `supabase` |
 | `BETTER_AUTH_SECRET` / `BETTER_AUTH_URL` | D2 | Auth |
 | `KAKAO_CLIENT_ID` / `KAKAO_CLIENT_SECRET` | D2 | Kakao |
@@ -410,7 +411,7 @@ App Router + `[locale]` · `proxy.ts` · Better Auth(Kakao) · `requireAuth` · 
 |------|--------------|----------|
 | 도메인 | 자산·구매·승인 | 미션 후원·결제 |
 | OAuth | Google (Kakao stub) | **Kakao 필수** |
-| DB 호스팅 | VPS Postgres 전형 | **Supabase** ✅ (+ 로컬 Docker) |
+| DB 호스팅 | VPS Postgres 전형 | **Supabase** ✅ (D0~ · Docker 선택) |
 | 결제 | 없음 | **Toss ✅** (+ Stripe 후보) |
 | 공개 페이지 | 거의 없음 | 미션 공개·SEO·QR |
 | PDF | 리포트 | 기부금 영수증 |
@@ -423,7 +424,7 @@ App Router + `[locale]` · `proxy.ts` · Better Auth(Kakao) · `requireAuth` · 
 
 | 단계 | 추가되는 스택 |
 |------|----------------|
-| **D0** | next-intl · Docker Postgres · drizzle 초기 · CI · Sentry 자리 · Supabase 프로젝트 |
+| **D0** | next-intl · **Supabase + Drizzle migrate** · CI · Sentry 자리 · (선택) Docker |
 | **D1** | react-qr-code · mock stores · `[locale]/m/[slug]` · P0 메시지 키 |
 | **D2** | Better Auth·Kakao · 전 스키마 · Toss · Upstash · Resend · RHF+Zod · TanStack Query · Storage |
 | **D3** | @react-pdf · 정산 cron · Q&A/메시지 |

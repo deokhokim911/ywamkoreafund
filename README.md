@@ -1,34 +1,48 @@
 # YWAMFund
 
-선교사 미션 후원 웹앱 — **현재는 UI 프로토타입** (DB · Auth · PG 미연동).
+선교사 미션 후원 웹앱. **D0:** next-intl (ko/en) + Supabase Postgres (Drizzle) 연결.
 
-기획·설계 문서: [`doc/`](./doc/) · UI 분석·개발 계획: [`doc/08_UI_PROTOTYPE_PLAN.md`](./doc/08_UI_PROTOTYPE_PLAN.md)
+기획·설계: [`doc/`](./doc/) · 개발 단계: [`doc/09_DEVELOPMENT_PHASES.md`](./doc/09_DEVELOPMENT_PHASES.md) · ENV: [`doc/ENV_YWAMFUND_PHASE0.md`](./doc/ENV_YWAMFUND_PHASE0.md)
 
 ## 실행
 
 ```bash
 pnpm install
+cp .env.example .env.local
+# DATABASE_URL = Supabase connection URI (Dashboard → Database)
+pnpm db:migrate
+pnpm db:health
 pnpm dev
 ```
 
-→ [http://localhost:3000](http://localhost:3000)
+- 한국어: [http://localhost:3000](http://localhost:3000)
+- English: [http://localhost:3000/en](http://localhost:3000/en)
 
-| 화면 | URL |
-|------|-----|
-| 홈 | `/` |
-| 미션·후원 | `/mission` |
-| 내 후원 | `/my` |
-| 선교사 대시보드 | `/dashboard` |
-| 캠페인 만들기 | `/create` |
-| Q&A | `/support` |
-| 관리자 | `/admin` |
+| 화면 | URL (ko) | URL (en) |
+|------|----------|----------|
+| 홈 | `/` | `/en` |
+| 미션·후원 | `/mission` | `/en/mission` |
+| 내 후원 | `/my` | `/en/my` |
+| 선교사 대시보드 | `/dashboard` | `/en/dashboard` |
+| 캠페인 만들기 | `/create` | `/en/create` |
+| Q&A | `/support` | `/en/support` |
+| 관리자 | `/admin` | `/en/admin` |
+| DB health | `/api/health/db` | — |
 
-## 스택 (프로토타입)
+## Supabase 규칙
 
-- Next.js 16 · React 19 · Tailwind CSS 4 · TypeScript
+- **사용:** Postgres (`DATABASE_URL`) + Drizzle. (선택) Storage.
+- **미사용:** Supabase Auth · Realtime · 클라이언트 Data API / `service_role`.
+- Auth는 **Better Auth + Kakao (D2)**.
+
+오프라인만 필요하면: `pnpm db:up` 후 `DB_PROVIDER=local` + 로컬 `DATABASE_URL`.
+
+## 스택
+
+- Next.js 16 · React 19 · Tailwind 4 · TypeScript · next-intl
+- Drizzle · Supabase Postgres · Vitest · ESLint
 - shadcn (base-nova) · recharts · react-simple-maps
-- 데이터: 하드코딩 mock / `lib/bannerStore` (세션 내 배너 공유)
 
-## 원본 레퍼런스
+## CI
 
-`~/DavidKim/YWAMLTS/Project/YWAMFund/Ref/donation-page-redesign`
+`pnpm typecheck` · `pnpm lint` · `pnpm test` · `pnpm messages:check-keys`

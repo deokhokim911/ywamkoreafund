@@ -4,7 +4,7 @@
 > **전제:** DB·Auth·실결제 미연동 — 화면·플로우는 존재  
 > **플랫폼 결정:** [10](./10_I18N_DB_PAYMENTS.md) — **결제 Phase1=Toss · DB 호스팅=Supabase** (대안 비교는 10에 보존)  
 > **관련:** [08](./08_UI_PROTOTYPE_PLAN.md) · [05](./05_PHASE_ROADMAP.md) · [04](./04_FEATURE_SPEC.md) · [03](./03_DATA_MODEL.md) · [01](./01_TECH_STACK.md)  
-> **작성일:** 2026-07-21 · **개정:** 2026-07-21 (Toss·Supabase 확정 반영)  
+> **작성일:** 2026-07-21 · **개정:** 2026-07-24 (D0 완료 · D1 핵심 완료 점검)  
 > **독자:** 구현 담당 (프론트·풀스택)
 
 ---
@@ -22,10 +22,11 @@
 
 1. UI 컴포넌트 재사용 · mock → 데이터 계층 치환.  
 2. **다국어 기반은 늦게 넣지 않는다** (D0부터 next-intl).  
-3. **DB:** 로컬 = Docker Postgres · **스테이징/프로덕션 = Supabase Postgres** ([10](./10_I18N_DB_PAYMENTS.md) ✅). VPS Postgres는 검토 대안으로 문서에만 보존.  
+3. **DB:** **D0부터 Supabase Postgres를 기본 연결** (`DATABASE_URL`). Docker Postgres는 **오프라인·선택 대안**. Auth는 Better Auth만 (Supabase Auth 미사용) — [10](./10_I18N_DB_PAYMENTS.md) ✅.  
 4. **결제 Phase 1 = Toss** ✅ · `PaymentProvider`로 Stripe(D5 후보) 확장 자리 유지.  
 5. 고객 미결(Q-07, Q-15, Q-55 등)은 단계 **블로커**로 명시.  
-6. 계정·키·인프라 사전 준비는 [11_DEV_PREPARATION.md](./11_DEV_PREPARATION.md).
+6. 계정·키·인프라 사전 준비는 [11_DEV_PREPARATION.md](./11_DEV_PREPARATION.md).  
+7. GiveHope 등 타 기부 UI 레퍼런스 이식은 [12_GIVEHOPE_FEATURE_MIGRATION.md](./12_GIVEHOPE_FEATURE_MIGRATION.md) (기존 YWAM 소스 중심).
 
 ---
 
@@ -46,7 +47,8 @@
 | 공백 | 채우는 단계 |
 |------|-------------|
 | next-intl · `[locale]` · ko/en 메시지 | **D0 → D1 → D3/D4** |
-| Docker Postgres · Drizzle · **Supabase(스테이징/프로덕션)** | **D0(compose) → D2** |
+| **Supabase Postgres + Drizzle** (연결·migrate) | **D0부터** — 도메인 스키마는 D2에서 확장 |
+| Docker Postgres | **D0 선택** (오프라인용) |
 | Better Auth · Kakao | **D2-A** |
 | **Toss** 실결제 · 웹훅 · 빌링 | **D2-C** |
 | PaymentProvider + Stripe 자리 (미도입) | **D2-C 인터페이스 · D5 후보** |
@@ -80,8 +82,8 @@
 | F17~F19 | 메시지·Updates·Q&A | 🔶/❌ | Resend · comments | D3 |
 | F22~F24 | 환불·대사·탈퇴 | ❌ | refunds · reconcile | D3 |
 | F25 | **i18n ko/en 기반** | ❌ | next-intl 전 구간 | **D0~D4** |
-| F29 | **로컬 Docker DB** | ❌ | compose + migrate | **D0·D2** |
-| F30 | **호스팅 DB** | ❌ | **Supabase ✅ 확정** (VPS는 [10](./10_I18N_DB_PAYMENTS.md) 이력) | D2 |
+| F29 | **로컬 Docker DB** | ❌ | compose (선택) | **D0 선택** |
+| F30 | **Supabase DB** | ❌ | **D0부터 연결·migrate** · 스키마는 D2 | **D0** ✅ |
 | F28 | 조직/팀 모금 | 🔶 | organizations | D5 |
 
 ---
@@ -92,7 +94,9 @@
 flowchart LR
   subgraph D0["D0"]
     I18nScaffold[next-intl scaffold]
-    DockerPG[(Docker Postgres)]
+    SupabasePG[(Supabase Postgres)]
+    DrizzleInit[Drizzle + migrate smoke]
+    DockerOpt[(Docker optional)]
     CI[CI / UI kit]
   end
 
@@ -103,7 +107,7 @@ flowchart LR
 
   subgraph D2["D2"]
     Auth[Better Auth Kakao]
-    Drizzle[Drizzle schema]
+    Schema[Domain schema on Supabase]
     Toss[TossProvider]
     PayIface[PaymentProvider iface]
   end
@@ -117,26 +121,32 @@ flowchart LR
   end
 
   D0 --> D1 --> D2 --> D3
+  SupabasePG --> Schema
   PayIface --> Toss
   PayIface -.-> Stripe
   D3 --> D5
 ```
 
-**디렉터리 목표 (D1 말~D2)**
+**디렉터리 목표 (D0~D2)**
 
 ```
 src/app/[locale]/(marketing|auth|dashboard)/...
 messages/ko.json
 messages/en.json
-src/lib/db/          # Drizzle — DATABASE_URL → local Docker | Supabase
+src/lib/db/
+  index.ts           # drizzle client — DATABASE_URL (Supabase 기본)
+  schema/            # D0: placeholder / health · D2: 도메인 전체
 src/lib/payments/
   types.ts           # PaymentProvider
   toss.ts            # Phase 1 구현
-  stripe.ts          # D5 후보 stub (비교·확장용, Phase 1 비활성)
-  router.ts          # donorContext → provider
-docker-compose.yml   # Postgres 16 (로컬만)
+  stripe.ts          # D5 후보 stub
+  router.ts
+.env.example         # DATABASE_URL=Supabase connection string
+docker-compose.yml   # (선택) 오프라인용 Postgres 16
 ```
 
+> **D0 기본:** `.env.local`의 `DATABASE_URL` = **Supabase** (staging 프로젝트).  
+> `DB_PROVIDER=supabase`. Docker는 `DB_PROVIDER=local`일 때만.
 ---
 
 ## 4. 개발 단계 상세
@@ -145,87 +155,99 @@ docker-compose.yml   # Postgres 16 (로컬만)
 
 ---
 
-### D0 — 엔지니어링 · i18n · 로컬 DB 기반 (4~7일)
+### D0 — 엔지니어링 · i18n · **Supabase DB 연결** (4~7일) ✅ **완료 (2026-07-23)**
 
-**목표:** “다국어·DB·결제를 얹을 수 있는” 레포. 비즈니스 기능 최소.
+**목표:** 다국어 기반 + **Supabase에 Drizzle로 연결·migrate 가능한 상태**.  
+비즈니스 도메인 테이블(missions 등)은 D2에서 올리되, **D0 종료 시점에 이미 Supabase를 쓸 수 있어야** 한다.
 
-| ID | 작업 | 산출물 / DoD |
-|----|------|--------------|
-| D0-1 | `ignoreBuildErrors` 제거 가능 수준으로 타입 정리 (recharts, maps) | `tsc --noEmit` 통과 |
-| D0-2 | ESLint + Vitest 스모크 + CI | PR lint/typecheck |
-| D0-3 | Sentry · rate-limit 훅 자리 · `doc/ENV_*.md` 초안 | ENV 목록에 DB/TOSS/STRIPE(예비)/i18n |
-| D0-4 | `components/ui` 최소셋 (dialog, input, label, textarea, select, badge) | 폼 일관성 |
-| **D0-5** | **next-intl 스캐폴딩** | `messages/ko.json`·`en.json` (nav, common 최소), `i18n/routing.ts`, 임시 `[locale]` 또는 root proxy 준비 |
-| **D0-6** | **Locale switcher** (Navbar) | ko↔en URL 전환, 미번역은 키/한글 폴백 허용 |
-| **D0-7** | **`docker-compose.yml` Postgres 16** | 로컬 개발 표준. 호스팅은 Supabase([10](./10_I18N_DB_PAYMENTS.md) ✅) |
-| D0-8 | drizzle-kit 초기화 + **Supabase 프로젝트 생성·`DATABASE_URL` 스테이징 발급** | 로컬·Supabase 둘 다 migrate 가능한지 스모크 |
-| D0-9 | `messages:check-keys` 스크립트 초안 | ko/en 키 집합 동일 |
+| ID | 작업 | 상태 | 산출물 / DoD |
+|----|------|------|--------------|
+| D0-1 | `ignoreBuildErrors` 제거 · 타입 정리 | ✅ | `pnpm typecheck` 통과 |
+| D0-2 | ESLint + Vitest + CI | ✅ | `.github/workflows/ci.yml` |
+| D0-3 | Sentry · rate-limit 자리 · ENV | ✅ | `doc/ENV_YWAMFUND_PHASE0.md` · `.env.example` |
+| D0-4 | `components/ui` 최소셋 | ✅ | dialog, input, label, textarea, select, badge |
+| **D0-5** | **next-intl 스캐폴딩** | ✅ | `messages/*` · `i18n/*` · `app/[locale]` · `proxy.ts` |
+| **D0-6** | **Locale switcher** | ✅ | Navbar 국기 토글 (ko↔en) |
+| **D0-7** | **Supabase 프로젝트** | ✅ | `YWAMFund` (`itwyvtcxaobfskgjhdqa`, ap-south-1) |
+| **D0-8** | **`DATABASE_URL`** | ✅ | `.env.local` · Session/Transaction pooler (IPv4) |
+| **D0-9** | **drizzle-kit + `lib/db`** | ✅ | `drizzle.config.ts` · `lib/db` |
+| **D0-10** | **migrate 스모크** | ✅ | `_ywam_health` · `pnpm db:migrate` / `db:health` |
+| D0-11 | Supabase 사용 규칙 | ✅ | README · ENV 문서 |
+| D0-12 | (선택) Docker Postgres | ✅ | `docker-compose.yml` |
+| D0-13 | `messages:check-keys` | ✅ | `pnpm messages:check-keys` · CI |
+| D0-14 | (선택) Storage `mission-media` | ⏭ D2 | 업로드와 함께 진행 |
 
 **DoD**
 
-- [ ] Docker Postgres 기동 · 연결 확인  
-- [ ] `/`와 `/en` (또는 prefix 정책)에서 네비 일부 영문 전환  
-- [ ] CI typecheck 통과  
+- [x] Supabase 프로젝트 존재 · `DATABASE_URL`로 앱/drizzle 연결  
+- [x] `pnpm db:migrate`가 **Supabase**에 적용됨  
+- [x] 서버 health 쿼리 성공 (`/api/health/db` · `pnpm db:health`)  
+- [x] `/`와 `/en`에서 네비 영문 전환  
+- [x] CI typecheck 통과  
+- [x] Docker 오프라인 안내 (README)
 
-**블로커:** 없음.  
-**참고:** [10 §1](./10_I18N_DB_PAYMENTS.md), [10 §2](./10_I18N_DB_PAYMENTS.md)
+**상태:** ✅ **D0 완료** — D1 착수 가능.  
+**참고:** [10 §2](./10_I18N_DB_PAYMENTS.md) — Postgres만 사용, Auth 미사용.
 
 ---
 
-### D1 — i18n 핵심 화면 · mock 도메인 · 라우트 (1.5~2.5주)
+### D1 — i18n 핵심 화면 · mock 도메인 · 라우트 (1.5~2.5주) ✅ **핵심 완료 (2026-07-24 점검)**
 
-**목표:** 데모 가능한 제품 루프 + **UI 문자열의 상당 부분을 메시지 파일로**. DB 앱 CRUD는 아직 mock store.
+**목표:** 데모 가능한 제품 루프 + **UI 문자열의 상당 부분을 메시지 파일로**.  
+도메인 CRUD는 아직 mock store (Supabase는 health/migrate 검증용).
 
-| ID | 작업 | 상세 |
-|----|------|------|
-| D1-1 | `lib/mock/` 통합 | missions, donations, banners 단일 소스 |
-| D1-2 | `missionStore` / `bannerStore` | create→approve→home 루프 (subscribe) |
-| D1-3 | `/[locale]/m/[slug]` | 카드·CTA 연결, `generateMetadata` (locale별 title) |
-| D1-4 | QR | 공개 URL(로케일 포함 정책 확정: 기본 ko URL 권장) |
-| D1-5 | Create → pending_review mock | Admin 승인 탭 연동 |
-| D1-6 | Admin 승인 → published | 홈 목록 반영 |
-| D1-7 | 로그인 스텁 | 역할 데모 (실 OAuth 아님) |
-| D1-8 | 모바일 nav | 햄버거 + locale 유지 |
-| **D1-9** | **i18n 키 이관 (P0 화면)** | Home, Mission, DonationModal, Navbar, 공통 버튼/에러 |
-| **D1-10** | **신규 문자열 하드코딩 금지** | PR 체크리스트 / ESLint `no-literal` 선택 |
-| D1-11 | `/support` 라벨 → “고객지원” | 미션 Q&A와 구분 (카피만) |
+| ID | 작업 | 상태 | 상세 |
+|----|------|------|------|
+| D1-1 | `lib/mock/` 통합 | ✅ | `lib/mock/missions.ts` · banners는 `bannerStore` |
+| D1-2 | `missionStore` / `bannerStore` | ✅ | create→approve→home subscribe |
+| D1-3 | `/[locale]/m/[slug]` | ✅ | 카드·배너·`/mission` 리다이렉트 연결 |
+| D1-4 | QR | ✅ | `react-qr-code` on mission detail |
+| D1-5 | Create → pending_review | ✅ | `missionStore.createPending` |
+| D1-6 | Admin 승인 → published | ✅ | 승인 탭 store 연동 · `m-*` 1단계 공개 |
+| D1-7 | 로그인 스텁 | ✅ | Navbar 데모 역할 (`AuthStubProvider`) |
+| D1-8 | 모바일 nav | ✅ | 햄버거 메뉴 |
+| **D1-9** | **i18n 키 이관 (P0)** | 🟡 부분 | nav/home/mission/donate 키(50) · **DonationModal·홈 검색 문구 잔여 KO** |
+| **D1-10** | **신규 문자열 하드코딩 금지** | 🟡 부분 | 신규 경로·Navbar/Home 카드는 키 사용 · 레거시 화면 점진 이관 |
+| D1-11 | `/support` 라벨 | ✅ | nav `고객지원` / `Support` |
 
-**금액·날짜:** `useFormatter()`로 표시. 저장 단위는 여전히 KRW mock number.
+**금액·날짜:** mock KRW 표시. `useFormatter` 확대는 잔여(비블로커).
 
 **DoD**
 
-- [ ] ko/en에서 홈·미션·후원 모달 주요 UI가 메시지 키 사용  
-- [ ] create→approve→`/m/{slug}` 데모  
-- [ ] `messages:check-keys` CI 통과  
+- [x] create→approve→`/m/{slug}` 데모 (세션 내 store)
+- [x] `messages:check-keys` CI 통과 (ko/en 50 keys)
+- [x] ko/en 홈·nav·미션(QR) 주요 UI 메시지 키
+- [ ] DonationModal 전 UI 키 이관 — **잔여 → D1 후속 또는 D2 병행**
 
-**블로커:** 없음.
+**상태:** ✅ **D1 핵심 루프·라우트·스토어 완료**. 문자열 잔여만 후속. **D2 착수 가능.**  
+**로그:** [logs/2026-07-24_DEV_LOG.md](./logs/2026-07-24_DEV_LOG.md)
 
 ---
 
 ### D2 — Auth · DB 영속화 · Toss 결제 코어 (4~6주) ⭐
 
-**목표:** 로컬 Docker + **Supabase(스테이징)** + Kakao + **Toss 실결제(테스트키)**.  
-Stripe는 인터페이스/stub만 (D5 후보 — [10 §3](./10_I18N_DB_PAYMENTS.md) 비교 유지).
+**목표:** **D0에서 연결해 둔 Supabase**에 도메인 스키마·Kakao·**Toss 테스트 결제**를 올린다.  
+Docker는 선택. Stripe는 stub (D5 후보).
 
 #### D2-0 게이트 (확정 반영 · 착수 체크)
 
 | ID | 항목 | 상태 |
 |----|------|------|
-| D2-0-1 | 호스팅 DB = **Supabase** | ✅ 확정 — 스테이징/프로덕션 `DATABASE_URL` 발급 |
+| D2-0-1 | DB = **Supabase** | ✅ 확정 — **D0에서 이미 프로젝트·migrate 가능해야 함** |
 | D2-0-2 | Phase 1 PG = **Toss** 테스트 키 | ✅ 확정 — ENV 설정 |
-| D2-0-3 | Stripe = D5 후보 · `pg_provider` 컬럼만 확보 | 도입 시점은 T-19 (미정) |
-| D2-0-4 | (이력) VPS Postgres 대안 | 채택하지 않음 — [10 §2.1](./10_I18N_DB_PAYMENTS.md) |
+| D2-0-3 | Stripe = D5 후보 · `pg_provider` 컬럼만 확보 | T-19 (미정) |
+| D2-0-4 | (이력) VPS Postgres | 채택하지 않음 — [10 §2.1](./10_I18N_DB_PAYMENTS.md) |
 
 #### D2-A 인프라 (약 1~1.5주)
 
 | ID | 작업 |
 |----|------|
-| D2-A1 | Drizzle 스키마: Better Auth tables + `user_roles` — **로컬 Docker에 migrate** |
-| D2-A2 | **동일 migrate → Supabase 스테이징** |
+| D2-A1 | Drizzle 스키마: Better Auth tables + `user_roles` — **Supabase에 migrate** (D0 파이프라인 재사용) |
+| D2-A2 | (선택) 동일 migrate를 Docker 로컬 URL에도 적용해 오프라인 검증 | |
 | D2-A3 | Kakao OAuth · 세션 · `requireAuth` / `requireRole` |
-| D2-A4 | 앱 트리를 `src/app/[locale]/...`로 정렬 (D0/D1에서 미완 시 완료) |
-| D2-A5 | 스토리지: S3-compatible **또는** Supabase Storage (추상화 유지) |
-| D2-A6 | Supabase: Data API/`anon` 남용 금지, **service_role·DB URL은 서버만**, Auth/Realtime 미사용 |
+| D2-A4 | 앱 트리를 `src/app/[locale]/...`로 정렬 (D0/D1 미완 시 완료) |
+| D2-A5 | 스토리지: Supabase Storage **또는** S3-compatible (추상화) — D0에서 버킷 만들었으면 연결 |
+| D2-A6 | Supabase 규칙 재확인: Data API/`anon` 남용 금지, **DB URL·service_role은 서버만**, Auth/Realtime 미사용 |
 
 #### D2-B 미션 영속화 (약 1~1.5주)
 
@@ -265,13 +287,14 @@ Stripe는 인터페이스/stub만 (D5 후보 — [10 §3](./10_I18N_DB_PAYMENTS.
 
 **DoD**
 
-- [ ] 로컬 Docker에서 migrate → Kakao 로그인 → 미션 승인 → Toss 테스트 일시/정기 E2E  
-- [ ] **Supabase 스테이징**에 동일 마이그레이션 적용  
+- [ ] **Supabase**에서 migrate → Kakao 로그인 → 미션 승인 → Toss 테스트 일시/정기 E2E  
+- [ ] (선택) Docker 로컬에서도 동일 마이그레이션 재현  
 - [ ] `PaymentProvider`로 **Toss만** 활성 (`PAYMENT_PROVIDERS_ENABLED=toss`), Stripe stub flag off  
 - [ ] `/my`·`/dashboard` 수치 = DB  
 
 **블로커:** Q-50~52(Toss 계약 세부), Q-55/T-25, Q-07/T-24(라이브), Q-70~71  
-**(해소됨)** T-10 Toss · T-18 Supabase — [10 §0](./10_I18N_DB_PAYMENTS.md)
+**(해소됨)** T-10 Toss · T-18 Supabase — [10 §0](./10_I18N_DB_PAYMENTS.md)  
+**(D0 선행)** Supabase `DATABASE_URL` · migrate 파이프라인
 
 ---
 
@@ -341,11 +364,15 @@ Stripe는 인터페이스/stub만 (D5 후보 — [10 §3](./10_I18N_DB_PAYMENTS.
 ### D0
 
 ```
-docker-compose.yml
 drizzle.config.ts
+src/lib/db/index.ts
+src/lib/db/schema/_health.ts   # 또는 동등 스모크 스키마
+.env.example                   # DATABASE_URL=Supabase, DB_PROVIDER=supabase
 messages/ko.json
 messages/en.json
-src/i18n/routing.ts   # 또는 동등
+src/i18n/routing.ts
+docker-compose.yml             # optional
+doc/ENV_YWAMFUND_PHASE0.md     # Supabase 연결 절차
 ```
 
 ### D1
@@ -359,7 +386,7 @@ messages/* 에 home, mission, donate
 ### D2
 
 ```
-src/lib/db/schema/**
+src/lib/db/schema/**           # Better Auth + missions + donations … on Supabase
 src/lib/payments/types.ts
 src/lib/payments/toss.ts
 src/lib/payments/stripe.ts      # stub
@@ -391,11 +418,11 @@ PAYMENT_PROVIDERS_ENABLED=toss,stripe
 
 ```mermaid
 flowchart TB
-  D0[D0 i18n+Docker+CI]
+  D0[D0 i18n+Supabase+Drizzle+CI]
   D1[D1 mock+slug+i18n screens]
-  D20[D2-0 DB/Toss 게이트]
-  D2A[D2-A Auth+Drizzle]
-  D2B[D2-B Mission DB]
+  D20[D2-0 Toss 게이트]
+  D2A[D2-A Auth on Supabase]
+  D2B[D2-B Mission schema]
   D2C[D2-C Toss+Provider]
   D2D[D2-D Dashboards]
   D3[D3 Ops+i18n Admin]
@@ -421,7 +448,7 @@ flowchart TB
 | D1 중 고객 Q-07/50/55 | 결제 ⊂ Auth 이후 |
 | D2-B ∥ 디자인 | 영수증 ⊂ succeeded donation |
 | D3-1 ∥ D3-4 | Stripe ⊂ Provider + Toss 안정화 후 (D5) |
-| D0 Docker ∥ next-intl · Supabase 프로젝트 생성 | 라이브 Toss ⊂ 법무 |
+| D0 next-intl ∥ **Supabase 프로젝트·migrate** | 라이브 Toss ⊂ 법무 |
 
 ---
 
@@ -445,7 +472,7 @@ flowchart TB
 
 | 단계 | 단위 | 통합 | E2E |
 |------|------|------|-----|
-| D0 | cn, i18n routing | Docker health | locale switch 스모크 |
+| D0 | cn, i18n routing | **Supabase migrate + health query** | locale switch 스모크 |
 | D1 | missionStore | — | create→approve→slug · `/en` 홈 |
 | D2 | PaymentProvider mock | webhook MSW | **Toss** 성공/실패 |
 | D3 | 채번 | Resend mock | PDF ko/en |
@@ -456,10 +483,10 @@ flowchart TB
 
 ## 9. 착수 순서 (권장)
 
-1. **D0:** Docker Postgres + **Supabase 프로젝트** + next-intl + CI  
+1. **D0:** **Supabase 프로젝트 + DATABASE_URL + Drizzle migrate** + next-intl + CI  
 2. **D1:** mock 루프 + `/m/[slug]` + Home/Mission/Donate 키 이관  
-3. **D2-0:** ✅ Toss · ✅ Supabase 확인 후 테스트 키·스테이징 URL만 세팅  
-4. **D2-A→C:** Auth → Mission DB(로컬+Supabase) → **TossProvider** (+ Stripe stub)  
+3. **D2-0:** Toss 테스트 키 세팅 (Supabase는 D0 완료 전제)  
+4. **D2-A→C:** Auth → Mission 스키마(Supabase) → **TossProvider** (+ Stripe stub)  
 5. **D3→D4:** 운영·영문 QA·베타  
 6. **D5 (후보):** 국제 결제 Stripe — T-19 이후  
 
@@ -470,6 +497,7 @@ flowchart TB
 | 이벤트 | 갱신 |
 |--------|------|
 | Toss/Supabase 확정 | [10 §0 Decision Log](./10_I18N_DB_PAYMENTS.md) — **완료** |
+| D0부터 Supabase 사용 | 본 문서 — **2026-07-23 반영** |
 | T-19 Stripe 도입 확정 시 | [10](./10_I18N_DB_PAYMENTS.md) §0·§3.5 + 본 문서 D5 |
 | i18n 로케일 추가 | `messages/*`, routing |
 | D2 스키마 | [03](./03_DATA_MODEL.md) SSOT |
@@ -489,20 +517,29 @@ flowchart TB
 
 | 09 | 05 | 비고 |
 |----|-----|------|
-| D0 | Phase 0 | **+ i18n·Docker** 명시 |
+| D0 | Phase 0 | **+ i18n · Supabase 연결·migrate** |
 | D1 | 0~1A 사이 | UI·i18n 정렬 |
-| D2 | 0+1A+1B | **Toss · Supabase** |
+| D2 | 0+1A+1B | **Toss · 도메인 스키마 on Supabase** |
 | D3 | 1C+1D | |
 | D4 | 1E+1F | en QA |
 | D5 | Phase 2 | **Stripe 후보·글로벌** |
 
-## 부록 C. 로컬 개발 원라이너 (목표)
+## 부록 C. 개발 원라이너 (목표 — Supabase 기본)
 
 ```bash
-docker compose up -d
-cp .env.example .env.local   # DATABASE_URL=postgresql://...@localhost:5432/...
-pnpm db:migrate
+# 1) Supabase Dashboard에서 프로젝트 생성 후 connection string 복사
+cp .env.example .env.local
+# DATABASE_URL=postgresql://...supabase.co:5432/postgres
+# DB_PROVIDER=supabase
+
+pnpm install
+pnpm db:migrate          # Supabase에 적용
+pnpm db:health           # (D0에서 추가) select 1 스모크
 pnpm dev
 # http://localhost:3000        → ko
 # http://localhost:3000/en     → en
+
+# (선택) 오프라인만 Docker
+# docker compose up -d
+# DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ywamfund DB_PROVIDER=local
 ```

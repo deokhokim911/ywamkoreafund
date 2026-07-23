@@ -300,10 +300,10 @@ export function MissionaryDashboardPage() {
                   tickFormatter={(v) => chartView === 'amount' ? `${v / 10_000}만` : `${v}`} />
                 <Tooltip
                   contentStyle={{ borderRadius: '0.75rem', border: '1px solid oklch(0.91 0 0)', fontSize: 12 }}
-                  formatter={(v: number) =>
+                  formatter={(v) =>
                     chartView === 'amount'
-                      ? [`${(v / 10_000).toLocaleString()}만원`, '모금액']
-                      : [`${v}명`, '후원자']
+                      ? [`${(Number(v ?? 0) / 10_000).toLocaleString()}만원`, '모금액']
+                      : [`${Number(v ?? 0)}명`, '후원자']
                   }
                 />
                 <Area

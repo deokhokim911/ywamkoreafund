@@ -71,17 +71,17 @@ export function DonationMarquee() {
 
   return (
     <div
-      className="overflow-hidden bg-primary/5 border-y border-primary/10 relative"
+      className="overflow-hidden relative rounded-2xl bg-primary/5 border border-primary/10"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
       {/* Left fade */}
-      <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-[oklch(0.97_0.01_195)] to-transparent z-10 pointer-events-none" />
+      <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-[oklch(0.97_0.01_195)] to-transparent z-10 pointer-events-none rounded-l-2xl" />
       {/* Right fade */}
-      <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-[oklch(0.97_0.01_195)] to-transparent z-10 pointer-events-none" />
+      <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-[oklch(0.97_0.01_195)] to-transparent z-10 pointer-events-none rounded-r-2xl" />
 
       {/* Label pill */}
-      <div className="absolute left-4 top-1/2 -translate-y-1/2 z-20 flex items-center gap-1.5 bg-primary text-primary-foreground text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">
+      <div className="absolute left-3 top-1/2 -translate-y-1/2 z-20 flex items-center gap-1.5 bg-primary text-primary-foreground text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">
         <span className="relative flex h-2 w-2">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
           <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />

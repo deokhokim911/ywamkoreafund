@@ -4,7 +4,7 @@
 > **확정 스택:** Toss(Phase 1) · Supabase(호스팅 DB) · Kakao OAuth · next-intl(ko/en) — [01](./01_TECH_STACK.md) · [10](./10_I18N_DB_PAYMENTS.md)  
 > **개발 단계:** [09](./09_DEVELOPMENT_PHASES.md)  
 > **고객 확인:** [07](./07_CUSTOMER_QUESTIONS.md)  
-> **작성일:** 2026-07-21
+> **작성일:** 2026-07-21 · **개정:** 2026-07-23 (D0부터 Supabase 기본 — [09](./09_DEVELOPMENT_PHASES.md))
 
 ---
 
@@ -19,7 +19,7 @@
 
 - 시크릿(키·비밀번호)은 **저장소에 커밋하지 않는다**. `.env.local` + 비밀번호 매니저/팀 시크릿 보관함.  
 - **테스트 키와 라이브 키를 분리**한다 (Toss·Kakao·Resend 등).  
-- 로컬은 Docker DB, 공유 스테이징은 **Supabase** — 같은 Drizzle 마이그레이션을 쓴다.
+- **개발 기본 DB = Supabase** (`DATABASE_URL`). Docker는 오프라인 선택 — 같은 Drizzle 마이그레이션.
 
 ---
 
@@ -27,9 +27,9 @@
 
 | 시기 | 준비하면 좋은 것 | 막히면 영향 |
 |------|------------------|-------------|
-| **지금 (D0 전)** | 로컬 도구(Node/pnpm/Docker) · GitHub · Supabase 프로젝트 · 도메인/가칭 · `.env.example` | D0 스캐폴딩 지연 |
+| **지금 (D0 전) ★** | 로컬 도구(Node/pnpm) · GitHub · **Supabase 프로젝트 + `DATABASE_URL`** · 도메인/가칭 · `.env.example` · (선택) Docker | **D0 migrate·연결 불가** |
 | **D0~D1 병행** | Kakao **개발** 앱 · Resend · Sentry · Upstash · 브랜드 에셋 | 로그인·메일·관측 연동 지연 |
-| **D2 직전 ★** | Toss **테스트** 키·웹훅 URL · Kakao 콜백 URL 확정 · Supabase `DATABASE_URL` · 사업자/정산 정보(고객) | **결제·Auth 불가** |
+| **D2 직전 ★** | Toss **테스트** 키·웹훅 URL · Kakao 콜백 URL 확정 · 사업자/정산 정보(고객) | **결제·Auth 불가** |
 | **D3 전** | 영수증 문구·단체 정보 · 약관 초안 · 발신 도메인(DNS) | PDF·메일 프로덕션 품질 |
 | **라이브(D4) 전** | Toss **라이브** 심사 · 법무(Q-07 등) · 프로덕션 Supabase · 도메인 TLS · 백업 확인 | 오픈 불가 |
 
@@ -50,16 +50,16 @@ flowchart LR
 
 1. **Node.js 22** (또는 ≥20.9) 설치 — [nodejs.org](https://nodejs.org) / `nvm install 22`  
 2. **pnpm** 활성화 — `corepack enable && corepack prepare pnpm@latest --activate`  
-3. **Docker Desktop** (또는 Docker Engine) 설치 — 로컬 Postgres용  
+3. **(선택)** Docker Desktop — 오프라인 Postgres용. **기본 DB는 Supabase**  
 4. 레포 클론 후:
    ```bash
    pnpm install
-   # D0 이후: docker compose up -d
-   # cp .env.example .env.local
+   cp .env.example .env.local   # DATABASE_URL=Supabase URI, DB_PROVIDER=supabase
+   # D0 이후: pnpm db:migrate && pnpm db:health
    pnpm dev
    ```
 5. IDE: VS Code/Cursor + ESLint·Tailwind 확장 권장  
-6. (선택) TablePlus / DBeaver / `drizzle-kit studio`로 DB 확인
+6. (선택) TablePlus / DBeaver / `drizzle-kit studio`로 DB 확인 — Supabase Dashboard SQL도 가능
 
 ### 2.2 체크리스트
 
@@ -67,46 +67,48 @@ flowchart LR
 |---|------|---|
 | L1 | Node ≥ 20.9 (권장 22) · `node -v` | ☐ |
 | L2 | pnpm · `pnpm -v` | ☐ |
-| L3 | Docker 기동 · `docker ps` | ☐ |
+| L3 | (선택) Docker 기동 · `docker ps` | ☐ |
 | L4 | 레포 `pnpm install` 성공 | ☐ |
 | L5 | `pnpm dev` → http://localhost:3000 | ☐ |
-| L6 | (D0 후) `docker compose up -d` 후 DB 접속 | ☐ |
+| L6 | **Supabase `DATABASE_URL`로 연결** (D0: migrate + health) | ☐ |
 | L7 | `.env.local` gitignore 확인 (커밋 안 됨) | ☐ |
 | L8 | GitHub 원격·브랜치 전략 합의 (main / develop) | ☐ |
+| L9 | (선택) `docker compose up -d` 오프라인 DB | ☐ |
 
 ---
 
-## 3. Supabase (호스팅 DB) ✅ 확정
+## 3. Supabase (기본 DB · D0부터) ✅ 확정
 
 ### 3.1 어떻게 준비하는가
 
 1. [supabase.com](https://supabase.com) 계정 · **Organization** 생성 (팀 초대)  
 2. 프로젝트 생성  
-   - 권장: `ywamfund-staging` 먼저, 이후 `ywamfund-prod`  
+   - 권장: `ywamfund-dev` / `ywamfund-staging` 먼저, 이후 `ywamfund-prod`  
    - Region: 한국/가까운 리전 (지연·개인정보 이전 고려)  
    - DB 비밀번호를 **비밀번호 매니저에 보관**  
 3. **Project Settings → Database**  
    - `Connection string` (URI, **Session/Transaction** 모드 중 Drizzle에 맞는 것 — 보통 pooled는 서버리스, VPS는 direct도 가능)  
-   - `DATABASE_URL`로 `.env.local`(스테이징용) / CI 시크릿에 저장  
+   - `DATABASE_URL`로 `.env.local`(개발·스테이징용) / CI 시크릿에 저장 — **D0 착수 전 필수**  
 4. **Auth / Realtime / Data API**  
    - 본 프로젝트는 **Better Auth만 사용** → Supabase Auth로 로그인 구현하지 않음  
    - 클라이언트에서 `service_role` 사용 금지 · DB는 **서버의 `DATABASE_URL`만**  
 5. (선택) Storage 버킷 `mission-media` — 또는 별도 S3. 추상화는 [01 §7](./01_TECH_STACK.md)  
 6. 백업: Pro 플랜이면 PITR 확인 · Free면 주기적 `pg_dump` 스크립트 준비  
-7. Drizzle: 로컬 migrate 검증 후 **동일 명령으로 스테이징 URL에 적용**
+7. Drizzle: **D0부터** `pnpm db:migrate`를 **Supabase URL에 직접** 적용 (스모크 → D2 도메인 스키마)
 
 ### 3.2 체크리스트
 
 | # | 항목 | ☐ |
 |---|------|---|
 | S1 | Supabase 계정·팀 멤버 초대 | ☐ |
-| S2 | Staging 프로젝트 생성 · region 기록 | ☐ |
+| S2 | Dev/Staging 프로젝트 생성 · region 기록 | ☐ |
 | S3 | DB password · connection string 시크릿 보관 | ☐ |
-| S4 | `DATABASE_URL` (staging)을 `.env` 템플릿에 슬롯만 명시 | ☐ |
+| S4 | `DATABASE_URL` (dev/staging)을 `.env.local`에 설정 · 템플릿에 슬롯 명시 | ☐ |
 | S5 | Auth를 앱 로그인에 쓰지 않기로 팀 공유 | ☐ |
 | S6 | (선택) Storage 버킷 · 정책(비공개+서명 URL) | ☐ |
 | S7 | Production 프로젝트는 라이브 직전 생성 계획 | ☐ |
 | S8 | 백업/PITR 정책 한 줄 문서화 | ☐ |
+| S9 | (D0) health migrate가 Supabase에 성공 | ☐ |
 
 ---
 
@@ -301,11 +303,11 @@ flowchart LR
 
 ### 9-A. 이번 주 안에 (D0 블로커 제거)
 
-- [ ] L1~L5 로컬 환경  
-- [ ] S1~S4 Supabase staging  
+- [ ] L1~L5 · L6 로컬 + **Supabase 연결**  
+- [ ] S1~S4 · S9 Supabase dev/staging · migrate 스모크  
 - [ ] H1 도메인/가칭 · H4 GitHub  
-- [ ] `.env.example`에 슬롯만 작성 (값은 로컬)  
-- [ ] 팀: Toss·Supabase 확정 인지 ([10](./10_I18N_DB_PAYMENTS.md))
+- [ ] `.env.example`에 슬롯만 작성 (값은 로컬) · `DB_PROVIDER=supabase`  
+- [ ] 팀: Toss·Supabase 확정 · **D0부터 Supabase** ([09](./09_DEVELOPMENT_PHASES.md)·[10](./10_I18N_DB_PAYMENTS.md))
 
 ### 9-B. D2 결제·로그인 직전
 
@@ -313,7 +315,7 @@ flowchart LR
 - [ ] T1~T5 Toss 테스트  
 - [ ] R1 Resend · E1 Sentry · U1 Upstash  
 - [ ] O1~O2 Storage  
-- [ ] S3 connection으로 drizzle migrate 스모크  
+- [ ] (이미 D0 완료 전제) Supabase에 도메인 스키마 migrate  
 - [ ] P2 결제 관련 고객 답변 최소치 (상점·정산 주체)
 
 ### 9-C. 베타·라이브 직전
@@ -336,9 +338,11 @@ flowchart LR
 # App
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 
-# Database (local Docker OR Supabase)
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ywamfund
-DB_PROVIDER=local
+# Database — 기본: Supabase (D0~). Docker는 선택
+DATABASE_URL=postgresql://postgres.[ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres
+DB_PROVIDER=supabase
+# (선택 오프라인) DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ywamfund
+# DB_PROVIDER=local
 
 # Auth (D2)
 BETTER_AUTH_SECRET=

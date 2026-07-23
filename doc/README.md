@@ -21,9 +21,12 @@
 | [06_OPEN_QUESTIONS.md](./06_OPEN_QUESTIONS.md) | 개발팀·기획 확인 필요 사항 |
 | [07_CUSTOMER_QUESTIONS.md](./07_CUSTOMER_QUESTIONS.md) | **고객에게 물어볼 질문 체크리스트** |
 | [08_UI_PROTOTYPE_PLAN.md](./08_UI_PROTOTYPE_PLAN.md) | UI 프로토타입 분석·이식 계획 |
-| [09_DEVELOPMENT_PHASES.md](./09_DEVELOPMENT_PHASES.md) | UI 기반 개발 단계 (D0~D5) — **Toss·Supabase 확정 반영** |
+| [09_DEVELOPMENT_PHASES.md](./09_DEVELOPMENT_PHASES.md) | UI 기반 개발 단계 (D0~D5) — **D0 완료 · D1 핵심 완료** |
 | [10_I18N_DB_PAYMENTS.md](./10_I18N_DB_PAYMENTS.md) | 다국어 · DB · 결제 — **Decision Log + 비교 이력** |
 | [11_DEV_PREPARATION.md](./11_DEV_PREPARATION.md) | **개발 사전 준비 가이드 · 체크리스트** |
+| [12_GIVEHOPE_FEATURE_MIGRATION.md](./12_GIVEHOPE_FEATURE_MIGRATION.md) | **GiveHope 레퍼런스 분석 · YWAM UI 중심 기능 마이그레이션** |
+| [ENV_YWAMFUND_PHASE0.md](./ENV_YWAMFUND_PHASE0.md) | D0 ENV · Supabase 연결 규칙 |
+| [logs/2026-07-24_DEV_LOG.md](./logs/2026-07-24_DEV_LOG.md) | **개발 로그 2026-07-24** (D0·D1) |
 
 ---
 
@@ -33,10 +36,11 @@
 2. 후원자가 **카카오 OAuth** 로그인 → **QR/공유 링크**로 미션 접속 → **Toss**로 일시/정기 후원  
 3. 선교사·후원자·관리자 **역할별 대시보드** (모금 현황, 후원자 목록, 기부금 영수증, 세계지도)  
 4. 미션별 **Q&A / 업데이트**, 메일·메신저 메시지  
-5. Phase 1: **Toss** · DB **Supabase**(로컬 Docker) → 1E 보안·법률·라이브 → 1F 베타  
+5. Phase 1: **Toss** · DB **Supabase**(D0~) → 1E 보안·법률·라이브 → 1F 베타  
 6. **다국어** ko/en (D0~) · **Stripe는 Phase 2 후보** (비교는 [10](./10_I18N_DB_PAYMENTS.md) 보존)
 
 **확정 (2026-07-21):** T-10 Toss · T-18 Supabase  
+**진행 (2026-07-24):** D0 ✅ · D1 핵심 ✅ — [개발 로그](./logs/2026-07-24_DEV_LOG.md)
 **착수 전 확인:** Q-07, T-24~T-25, Q-15, Q-55 · Stripe는 T-19(미정)  
 **사전 준비:** [11_DEV_PREPARATION.md](./11_DEV_PREPARATION.md) (계정·키·인프라·법무 체크리스트)
 
