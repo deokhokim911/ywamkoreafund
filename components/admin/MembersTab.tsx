@@ -8,6 +8,7 @@ import {
   UserCheck, UserX, Send, Users, Heart, Globe, Plus, Pencil,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { RowActionMenu } from '@/components/ui/RowActionMenu'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface Missionary {
@@ -29,6 +30,8 @@ interface Donor {
   name: string
   email: string
   phone: string
+  birthDate: string
+  newsletterOptIn: boolean
   totalAmount: number
   donationCount: number
   regularAmount: number
@@ -50,18 +53,18 @@ const INIT_MISSIONARIES: Missionary[] = [
 ]
 
 const INIT_DONORS: Donor[] = [
-  { id: 'd1',  name: '이수현', email: 'suhyun.lee@gmail.com',   phone: '010-3312-9087', totalAmount: 480_000,   donationCount: 12, regularAmount: 30_000,  lastDonation: '2025.07.14', joinedAt: '2024.07.20', status: 'active',   campaigns: ['태국 문해교육', '미얀마 의료봉사'] },
-  { id: 'd2',  name: '박지훈', email: 'jihoon.park@naver.com',  phone: '010-5541-2031', totalAmount: 120_000,   donationCount: 4,  regularAmount: 0,        lastDonation: '2025.07.13', joinedAt: '2025.02.11', status: 'active',   campaigns: ['캄보디아 성경교육'] },
-  { id: 'd3',  name: '김민지', email: 'minji.kim@kakao.com',    phone: '010-8820-3345', totalAmount: 1_200_000, donationCount: 24, regularAmount: 50_000,  lastDonation: '2025.07.12', joinedAt: '2023.07.01', status: 'active',   campaigns: ['미얀마 의료봉사', '태국 문해교육', '몽골 교회개척'] },
-  { id: 'd4',  name: '최유진', email: 'yujin.choi@gmail.com',   phone: '010-2293-8812', totalAmount: 60_000,    donationCount: 6,  regularAmount: 0,        lastDonation: '2025.07.11', joinedAt: '2025.04.15', status: 'active',   campaigns: ['태국 문해교육'] },
-  { id: 'd5',  name: '정성훈', email: 'sunghun.jung@naver.com', phone: '010-7710-5523', totalAmount: 600_000,   donationCount: 12, regularAmount: 50_000,  lastDonation: '2025.07.10', joinedAt: '2024.07.01', status: 'active',   campaigns: ['몽골 교회개척'] },
-  { id: 'd6',  name: '한소희', email: 'sohee.han@gmail.com',    phone: '010-4430-1199', totalAmount: 250_000,   donationCount: 5,  regularAmount: 50_000,  lastDonation: '2025.06.01', joinedAt: '2025.01.20', status: 'paused',   campaigns: ['캄보디아 성경교육'] },
-  { id: 'd7',  name: '윤재원', email: 'jaewon.yun@kakao.com',   phone: '010-9900-8812', totalAmount: 90_000,    donationCount: 3,  regularAmount: 0,        lastDonation: '2025.04.22', joinedAt: '2025.03.05', status: 'active',   campaigns: ['태국 문해교육'] },
-  { id: 'd8',  name: '임채원', email: 'chaewon.lim@naver.com',  phone: '010-3381-7745', totalAmount: 30_000,    donationCount: 1,  regularAmount: 0,        lastDonation: '2025.03.01', joinedAt: '2025.03.01', status: 'inactive', campaigns: ['미얀마 의료봉사'] },
-  { id: 'd9',  name: '강다은', email: 'daeun.kang@gmail.com',   phone: '010-6612-4400', totalAmount: 360_000,   donationCount: 12, regularAmount: 30_000,  lastDonation: '2025.07.08', joinedAt: '2024.07.08', status: 'active',   campaigns: ['태국 문해교육', '캄보디아 성경교육'] },
-  { id: 'd10', name: '서준호', email: 'junho.seo@kakao.com',    phone: '010-1120-9923', totalAmount: 800_000,   donationCount: 16, regularAmount: 50_000,  lastDonation: '2025.07.07', joinedAt: '2024.03.10', status: 'active',   campaigns: ['미얀마 의료봉사'] },
-  { id: 'd11', name: '오지수', email: 'jisu.oh@naver.com',      phone: '010-7723-3310', totalAmount: 150_000,   donationCount: 3,  regularAmount: 50_000,  lastDonation: '2025.07.05', joinedAt: '2025.04.01', status: 'active',   campaigns: ['몽골 교회개척'] },
-  { id: 'd12', name: '신예진', email: 'yejin.shin@gmail.com',   phone: '010-5534-6612', totalAmount: 100_000,   donationCount: 2,  regularAmount: 0,        lastDonation: '2025.05.22', joinedAt: '2025.02.14', status: 'inactive', campaigns: ['캄보디아 성경교육'] },
+  { id: 'd1',  name: '이수현', email: 'suhyun.lee@gmail.com',   phone: '010-3312-9087', birthDate: '1992-03-14', newsletterOptIn: true,  totalAmount: 480_000,   donationCount: 12, regularAmount: 30_000,  lastDonation: '2025.07.14', joinedAt: '2024.07.20', status: 'active',   campaigns: ['태국 문해교육', '미얀마 의료봉사'] },
+  { id: 'd2',  name: '박지훈', email: 'jihoon.park@naver.com',  phone: '010-5541-2031', birthDate: '1988-11-02', newsletterOptIn: false, totalAmount: 120_000,   donationCount: 4,  regularAmount: 0,        lastDonation: '2025.07.13', joinedAt: '2025.02.11', status: 'active',   campaigns: ['캄보디아 성경교육'] },
+  { id: 'd3',  name: '김민지', email: 'minji.kim@kakao.com',    phone: '010-8820-3345', birthDate: '1995-07-21', newsletterOptIn: true,  totalAmount: 1_200_000, donationCount: 24, regularAmount: 50_000,  lastDonation: '2025.07.12', joinedAt: '2023.07.01', status: 'active',   campaigns: ['미얀마 의료봉사', '태국 문해교육', '몽골 교회개척'] },
+  { id: 'd4',  name: '최유진', email: 'yujin.choi@gmail.com',   phone: '010-2293-8812', birthDate: '2001-01-08', newsletterOptIn: true,  totalAmount: 60_000,    donationCount: 6,  regularAmount: 0,        lastDonation: '2025.07.11', joinedAt: '2025.04.15', status: 'active',   campaigns: ['태국 문해교육'] },
+  { id: 'd5',  name: '정성훈', email: 'sunghun.jung@naver.com', phone: '010-7710-5523', birthDate: '1985-09-30', newsletterOptIn: false, totalAmount: 600_000,   donationCount: 12, regularAmount: 50_000,  lastDonation: '2025.07.10', joinedAt: '2024.07.01', status: 'active',   campaigns: ['몽골 교회개척'] },
+  { id: 'd6',  name: '한소희', email: 'sohee.han@gmail.com',    phone: '010-4430-1199', birthDate: '1990-05-16', newsletterOptIn: true,  totalAmount: 250_000,   donationCount: 5,  regularAmount: 50_000,  lastDonation: '2025.06.01', joinedAt: '2025.01.20', status: 'paused',   campaigns: ['캄보디아 성경교육'] },
+  { id: 'd7',  name: '윤재원', email: 'jaewon.yun@kakao.com',   phone: '010-9900-8812', birthDate: '1998-12-03', newsletterOptIn: false, totalAmount: 90_000,    donationCount: 3,  regularAmount: 0,        lastDonation: '2025.04.22', joinedAt: '2025.03.05', status: 'active',   campaigns: ['태국 문해교육'] },
+  { id: 'd8',  name: '임채원', email: 'chaewon.lim@naver.com',  phone: '010-3381-7745', birthDate: '1979-04-27', newsletterOptIn: false, totalAmount: 30_000,    donationCount: 1,  regularAmount: 0,        lastDonation: '2025.03.01', joinedAt: '2025.03.01', status: 'inactive', campaigns: ['미얀마 의료봉사'] },
+  { id: 'd9',  name: '강다은', email: 'daeun.kang@gmail.com',   phone: '010-6612-4400', birthDate: '1993-08-11', newsletterOptIn: true,  totalAmount: 360_000,   donationCount: 12, regularAmount: 30_000,  lastDonation: '2025.07.08', joinedAt: '2024.07.08', status: 'active',   campaigns: ['태국 문해교육', '캄보디아 성경교육'] },
+  { id: 'd10', name: '서준호', email: 'junho.seo@kakao.com',    phone: '010-1120-9923', birthDate: '1987-02-19', newsletterOptIn: true,  totalAmount: 800_000,   donationCount: 16, regularAmount: 50_000,  lastDonation: '2025.07.07', joinedAt: '2024.03.10', status: 'active',   campaigns: ['미얀마 의료봉사'] },
+  { id: 'd11', name: '오지수', email: 'jisu.oh@naver.com',      phone: '010-7723-3310', birthDate: '1996-06-25', newsletterOptIn: false, totalAmount: 150_000,   donationCount: 3,  regularAmount: 50_000,  lastDonation: '2025.07.05', joinedAt: '2025.04.01', status: 'active',   campaigns: ['몽골 교회개척'] },
+  { id: 'd12', name: '신예진', email: 'yejin.shin@gmail.com',   phone: '010-5534-6612', birthDate: '2000-10-09', newsletterOptIn: true,  totalAmount: 100_000,   donationCount: 2,  regularAmount: 0,        lastDonation: '2025.05.22', joinedAt: '2025.02.14', status: 'inactive', campaigns: ['캄보디아 성경교육'] },
 ]
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
@@ -224,10 +227,21 @@ function MissionaryFormModal({
 // ─── Donor form modal ──────────────────────────────────────────────────────────
 interface DFormState {
   name: string; email: string; phone: string
+  birthDate: string
+  newsletterOptIn: boolean
   regularAmount: string; status: Donor['status']
   campaigns: string
 }
-const EMPTY_D: DFormState = { name: '', email: '', phone: '', regularAmount: '', status: 'active', campaigns: '' }
+const EMPTY_D: DFormState = {
+  name: '',
+  email: '',
+  phone: '',
+  birthDate: '',
+  newsletterOptIn: false,
+  regularAmount: '',
+  status: 'active',
+  campaigns: '',
+}
 
 function DonorFormModal({
   initial, target, onSave, onClose,
@@ -238,17 +252,18 @@ function DonorFormModal({
   onClose: () => void
 }) {
   const [form, setForm] = useState<DFormState>(initial)
-  const [errors, setErrors] = useState<Partial<DFormState>>({})
+  const [errors, setErrors] = useState<Partial<Record<keyof DFormState, string>>>({})
 
-  function set(k: keyof DFormState, v: string) {
+  function set(k: keyof DFormState, v: string | boolean) {
     setForm((f) => ({ ...f, [k]: v }))
     setErrors((e) => ({ ...e, [k]: undefined }))
   }
 
   function validate() {
-    const e: Partial<DFormState> = {}
-    if (!form.name.trim())  e.name  = '이름을 입력하세요'
+    const e: Partial<Record<keyof DFormState, string>> = {}
+    if (!form.name.trim()) e.name = '이름을 입력하세요'
     if (!form.email.trim()) e.email = '이메일을 입력하세요'
+    if (!form.birthDate) e.birthDate = '생년월일을 입력하세요'
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -256,16 +271,33 @@ function DonorFormModal({
   function handleSave() {
     if (!validate()) return
     const campaignList = form.campaigns.split(',').map((c) => c.trim()).filter(Boolean)
-    const regularAmt   = parseInt(form.regularAmount.replace(/[^0-9]/g, ''), 10) || 0
+    const regularAmt = parseInt(form.regularAmount.replace(/[^0-9]/g, ''), 10) || 0
     const saved: Donor = target
-      ? { ...target, ...form, regularAmount: regularAmt, campaigns: campaignList }
+      ? {
+          ...target,
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          birthDate: form.birthDate,
+          newsletterOptIn: form.newsletterOptIn,
+          status: form.status,
+          regularAmount: regularAmt,
+          campaigns: campaignList,
+        }
       : {
           id: `d${uid()}`,
-          name: form.name, email: form.email, phone: form.phone,
-          status: form.status, regularAmount: regularAmt,
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          birthDate: form.birthDate,
+          newsletterOptIn: form.newsletterOptIn,
+          status: form.status,
+          regularAmount: regularAmt,
           campaigns: campaignList,
-          totalAmount: 0, donationCount: 0,
-          lastDonation: '—', joinedAt: today(),
+          totalAmount: 0,
+          donationCount: 0,
+          lastDonation: '—',
+          joinedAt: today(),
         }
     onSave(saved)
   }
@@ -317,9 +349,35 @@ function DonorFormModal({
             </Field>
           </div>
           <div className="col-span-2 sm:col-span-1">
+            <Field label="생년월일" required>
+              <input
+                className={cn(INPUT, errors.birthDate && 'border-destructive')}
+                type="date"
+                value={form.birthDate}
+                max={new Date().toISOString().slice(0, 10)}
+                onChange={(e) => set('birthDate', e.target.value)}
+              />
+              {errors.birthDate && <p className="text-xs text-destructive mt-1">{errors.birthDate}</p>}
+            </Field>
+          </div>
+          <div className="col-span-2 sm:col-span-1">
             <Field label="월 정기 후원액">
               <input className={INPUT} value={form.regularAmount} onChange={(e) => set('regularAmount', e.target.value)} placeholder="0" />
             </Field>
+          </div>
+          <div className="col-span-2">
+            <label className="flex items-start gap-3 cursor-pointer rounded-xl border border-border p-3 hover:bg-muted/40 transition-colors">
+              <input
+                type="checkbox"
+                checked={form.newsletterOptIn}
+                onChange={(e) => set('newsletterOptIn', e.target.checked)}
+                className="mt-0.5 accent-primary w-4 h-4"
+              />
+              <span>
+                <span className="block text-sm font-medium text-foreground">뉴스레터 구독</span>
+                <span className="block text-xs text-muted-foreground mt-0.5">사역 소식·캠페인 안내 메일 수신</span>
+              </span>
+            </label>
           </div>
           <div className="col-span-2">
             <Field label="후원 캠페인">
@@ -652,52 +710,80 @@ export function MembersTab() {
                           >
                             <Pencil size={14} />
                           </button>
-                          <div className="relative">
+                          <RowActionMenu
+                            open={mOpenMenu === m.id}
+                            onClose={() => setMOpenMenu(null)}
+                            trigger={
+                              <button
+                                type="button"
+                                onClick={() => setMOpenMenu(mOpenMenu === m.id ? null : m.id)}
+                                className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                                aria-label="더보기"
+                                aria-expanded={mOpenMenu === m.id}
+                              >
+                                <MoreHorizontal size={15} />
+                              </button>
+                            }
+                          >
                             <button
-                              onClick={() => setMOpenMenu(mOpenMenu === m.id ? null : m.id)}
-                              className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                              aria-label="더보기"
+                              type="button"
+                              role="menuitem"
+                              onClick={() => {
+                                openEditMissionary(m)
+                                setMOpenMenu(null)
+                              }}
+                              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-foreground hover:bg-muted"
                             >
-                              <MoreHorizontal size={15} />
+                              <Pencil size={13} /> 정보 수정
                             </button>
-                            {mOpenMenu === m.id && (
-                              <div className="absolute right-0 top-8 z-10 bg-card border border-border rounded-xl shadow-lg py-1.5 w-36">
-                                <button
-                                  onClick={() => openEditMissionary(m)}
-                                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-foreground hover:bg-muted"
-                                >
-                                  <Pencil size={13} /> 정보 수정
-                                </button>
-                                <button className="flex items-center gap-2 w-full px-3 py-2 text-sm text-foreground hover:bg-muted">
-                                  <Send size={13} /> 메일 발송
-                                </button>
-                                {m.status === 'pending' && (
-                                  <button
-                                    onClick={() => approveMissionary(m.id)}
-                                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[oklch(0.38_0.12_165)] hover:bg-muted"
-                                  >
-                                    <CheckCircle size={13} /> 승인하기
-                                  </button>
-                                )}
-                                {m.status !== 'inactive' && (
-                                  <button
-                                    onClick={() => { setMConfirmTarget(m); setMOpenMenu(null) }}
-                                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-destructive hover:bg-muted"
-                                  >
-                                    <UserX size={13} /> 비활성화
-                                  </button>
-                                )}
-                                {m.status === 'inactive' && (
-                                  <button
-                                    onClick={() => { setMissionaries((prev) => prev.map((x) => x.id === m.id ? { ...x, status: 'active' } : x)); setMOpenMenu(null) }}
-                                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[oklch(0.38_0.12_165)] hover:bg-muted"
-                                  >
-                                    <UserCheck size={13} /> 활성화
-                                  </button>
-                                )}
-                              </div>
+                            <button
+                              type="button"
+                              role="menuitem"
+                              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-foreground hover:bg-muted"
+                            >
+                              <Send size={13} /> 메일 발송
+                            </button>
+                            {m.status === 'pending' && (
+                              <button
+                                type="button"
+                                role="menuitem"
+                                onClick={() => approveMissionary(m.id)}
+                                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[oklch(0.38_0.12_165)] hover:bg-muted"
+                              >
+                                <CheckCircle size={13} /> 승인하기
+                              </button>
                             )}
-                          </div>
+                            {m.status !== 'inactive' && (
+                              <button
+                                type="button"
+                                role="menuitem"
+                                onClick={() => {
+                                  setMConfirmTarget(m)
+                                  setMOpenMenu(null)
+                                }}
+                                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-destructive hover:bg-muted"
+                              >
+                                <UserX size={13} /> 비활성화
+                              </button>
+                            )}
+                            {m.status === 'inactive' && (
+                              <button
+                                type="button"
+                                role="menuitem"
+                                onClick={() => {
+                                  setMissionaries((prev) =>
+                                    prev.map((x) =>
+                                      x.id === m.id ? { ...x, status: 'active' } : x,
+                                    ),
+                                  )
+                                  setMOpenMenu(null)
+                                }}
+                                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[oklch(0.38_0.12_165)] hover:bg-muted"
+                              >
+                                <UserCheck size={13} /> 활성화
+                              </button>
+                            )}
+                          </RowActionMenu>
                         </div>
                       </td>
                     </tr>
@@ -787,6 +873,8 @@ export function MembersTab() {
                   <tr className="border-b border-border bg-muted/40">
                     <th className="text-left font-semibold text-muted-foreground px-5 py-3">후원자</th>
                     <th className="text-center font-semibold text-muted-foreground px-4 py-3">상태</th>
+                    <th className="text-left font-semibold text-muted-foreground px-4 py-3">생년월일</th>
+                    <th className="text-center font-semibold text-muted-foreground px-4 py-3">뉴스레터</th>
                     <DSortTh col="totalAmount"   label="총 후원액"  current={dSort} dir={dDir} onSort={handleDSort} />
                     <DSortTh col="donationCount" label="후원 횟수"  current={dSort} dir={dDir} onSort={handleDSort} />
                     <th className="text-right font-semibold text-muted-foreground px-4 py-3">정기 후원</th>
@@ -816,6 +904,21 @@ export function MembersTab() {
                           {D_STATUS_LABEL[d.status]}
                         </span>
                       </td>
+                      <td className="px-4 py-3.5 text-left text-muted-foreground text-xs tabular-nums">
+                        {d.birthDate.replace(/-/g, '.')}
+                      </td>
+                      <td className="px-4 py-3.5 text-center">
+                        <span
+                          className={cn(
+                            'text-xs font-semibold px-2.5 py-1 rounded-full',
+                            d.newsletterOptIn
+                              ? 'bg-accent text-accent-foreground'
+                              : 'bg-muted text-muted-foreground',
+                          )}
+                        >
+                          {d.newsletterOptIn ? '구독' : '미구독'}
+                        </span>
+                      </td>
                       <td className="px-4 py-3.5 text-right font-semibold text-primary">{formatKRW(d.totalAmount)}</td>
                       <td className="px-4 py-3.5 text-right text-foreground">{d.donationCount}회</td>
                       <td className="px-4 py-3.5 text-right text-muted-foreground text-xs">
@@ -831,44 +934,70 @@ export function MembersTab() {
                           >
                             <Pencil size={14} />
                           </button>
-                          <div className="relative">
+                          <RowActionMenu
+                            open={dOpenMenu === d.id}
+                            onClose={() => setDOpenMenu(null)}
+                            trigger={
+                              <button
+                                type="button"
+                                onClick={() => setDOpenMenu(dOpenMenu === d.id ? null : d.id)}
+                                className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                                aria-label="더보기"
+                                aria-expanded={dOpenMenu === d.id}
+                              >
+                                <MoreHorizontal size={15} />
+                              </button>
+                            }
+                          >
                             <button
-                              onClick={() => setDOpenMenu(dOpenMenu === d.id ? null : d.id)}
-                              className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                              aria-label="더보기"
+                              type="button"
+                              role="menuitem"
+                              onClick={() => {
+                                openEditDonor(d)
+                                setDOpenMenu(null)
+                              }}
+                              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-foreground hover:bg-muted"
                             >
-                              <MoreHorizontal size={15} />
+                              <Pencil size={13} /> 정보 수정
                             </button>
-                            {dOpenMenu === d.id && (
-                              <div className="absolute right-0 top-8 z-10 bg-card border border-border rounded-xl shadow-lg py-1.5 w-36">
-                                <button
-                                  onClick={() => openEditDonor(d)}
-                                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-foreground hover:bg-muted"
-                                >
-                                  <Pencil size={13} /> 정보 수정
-                                </button>
-                                <button className="flex items-center gap-2 w-full px-3 py-2 text-sm text-foreground hover:bg-muted">
-                                  <Send size={13} /> 메일 발송
-                                </button>
-                                {d.status !== 'inactive' && (
-                                  <button
-                                    onClick={() => { setDConfirmTarget(d); setDOpenMenu(null) }}
-                                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-destructive hover:bg-muted"
-                                  >
-                                    <UserX size={13} /> 비활성화
-                                  </button>
-                                )}
-                                {d.status === 'inactive' && (
-                                  <button
-                                    onClick={() => { setDonors((prev) => prev.map((x) => x.id === d.id ? { ...x, status: 'active' } : x)); setDOpenMenu(null) }}
-                                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[oklch(0.38_0.12_165)] hover:bg-muted"
-                                  >
-                                    <UserCheck size={13} /> 활성화
-                                  </button>
-                                )}
-                              </div>
+                            <button
+                              type="button"
+                              role="menuitem"
+                              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-foreground hover:bg-muted"
+                            >
+                              <Send size={13} /> 메일 발송
+                            </button>
+                            {d.status !== 'inactive' && (
+                              <button
+                                type="button"
+                                role="menuitem"
+                                onClick={() => {
+                                  setDConfirmTarget(d)
+                                  setDOpenMenu(null)
+                                }}
+                                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-destructive hover:bg-muted"
+                              >
+                                <UserX size={13} /> 비활성화
+                              </button>
                             )}
-                          </div>
+                            {d.status === 'inactive' && (
+                              <button
+                                type="button"
+                                role="menuitem"
+                                onClick={() => {
+                                  setDonors((prev) =>
+                                    prev.map((x) =>
+                                      x.id === d.id ? { ...x, status: 'active' } : x,
+                                    ),
+                                  )
+                                  setDOpenMenu(null)
+                                }}
+                                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[oklch(0.38_0.12_165)] hover:bg-muted"
+                              >
+                                <UserCheck size={13} /> 활성화
+                              </button>
+                            )}
+                          </RowActionMenu>
                         </div>
                       </td>
                     </tr>
@@ -911,7 +1040,16 @@ export function MembersTab() {
       {/* ── Donor modals ──────────────────────────────────────────────────────── */}
       {dFormOpen && (
         <DonorFormModal
-          initial={dFormTarget ? { name: dFormTarget.name, email: dFormTarget.email, phone: dFormTarget.phone, regularAmount: dFormTarget.regularAmount ? String(dFormTarget.regularAmount) : '', status: dFormTarget.status, campaigns: dFormTarget.campaigns.join(', ') } : EMPTY_D}
+          initial={dFormTarget ? {
+            name: dFormTarget.name,
+            email: dFormTarget.email,
+            phone: dFormTarget.phone,
+            birthDate: dFormTarget.birthDate,
+            newsletterOptIn: dFormTarget.newsletterOptIn,
+            regularAmount: dFormTarget.regularAmount ? String(dFormTarget.regularAmount) : '',
+            status: dFormTarget.status,
+            campaigns: dFormTarget.campaigns.join(', '),
+          } : EMPTY_D}
           target={dFormTarget}
           onSave={saveDonor}
           onClose={() => setDFormOpen(false)}

@@ -38,6 +38,8 @@ const DONOR = {
   name: '이수현',
   email: 'lee.suhyun@gmail.com',
   phone: '010-1234-5678',
+  birthDate: '1992.03.14',
+  newsletterOptIn: true,
   joinedAt: '2024년 3월',
   avatarInitial: '이',
 }
@@ -301,7 +303,9 @@ export function DonorDashboardPage() {
                 </span>
               </div>
               <p className="text-sm text-muted-foreground mt-0.5">
-                {DONOR.email} · {DONOR.joinedAt}부터 함께하고 있어요
+                {DONOR.email} · 생년월일 {DONOR.birthDate} ·{' '}
+                {DONOR.newsletterOptIn ? '뉴스레터 구독 중' : '뉴스레터 미구독'} ·{' '}
+                {DONOR.joinedAt}부터 함께하고 있어요
               </p>
             </div>
           </div>
@@ -473,40 +477,66 @@ export function DonorDashboardPage() {
                   className="w-full pl-8 pr-3 py-2 text-sm bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground"
                 />
               </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                {(['전체', '정기', '일시'] as const).map((f) => (
+              <div className="flex items-center gap-2 flex-wrap" role="group" aria-label="후원 내역 필터">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTypeFilter('전체')
+                    setStatusFilter('전체')
+                    setPage(1)
+                  }}
+                  className={cn(
+                    'px-3 py-1.5 rounded-full text-xs font-semibold transition-colors',
+                    typeFilter === '전체' && statusFilter === '전체'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+                  )}
+                >
+                  전체
+                </button>
+                {(['정기', '일시'] as const).map((f) => (
                   <button
                     key={f}
-                    onClick={() => { setTypeFilter(f); setPage(1) }}
+                    type="button"
+                    onClick={() => {
+                      setTypeFilter(f)
+                      setPage(1)
+                    }}
                     className={cn(
                       'px-3 py-1.5 rounded-full text-xs font-semibold transition-colors',
                       typeFilter === f
                         ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                        : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground',
                     )}
                   >
                     {f}
                   </button>
                 ))}
-                <div className="w-px h-4 bg-border" />
-                {(['전체', 'confirmed', 'pending', 'cancelled'] as const).map((f) => {
-                  const label =
-                    f === '전체' ? '전체' : f === 'confirmed' ? '완료' : f === 'pending' ? '처리중' : '취소'
-                  return (
-                    <button
-                      key={f}
-                      onClick={() => { setStatusFilter(f); setPage(1) }}
-                      className={cn(
-                        'px-3 py-1.5 rounded-full text-xs font-semibold transition-colors',
-                        statusFilter === f
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                      )}
-                    >
-                      {label}
-                    </button>
-                  )
-                })}
+                <div className="w-px h-4 bg-border" aria-hidden="true" />
+                {(
+                  [
+                    { id: 'confirmed' as const, label: '완료' },
+                    { id: 'pending' as const, label: '처리중' },
+                    { id: 'cancelled' as const, label: '취소' },
+                  ]
+                ).map((f) => (
+                  <button
+                    key={f.id}
+                    type="button"
+                    onClick={() => {
+                      setStatusFilter(f.id)
+                      setPage(1)
+                    }}
+                    className={cn(
+                      'px-3 py-1.5 rounded-full text-xs font-semibold transition-colors',
+                      statusFilter === f.id
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+                    )}
+                  >
+                    {f.label}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
@@ -689,9 +719,9 @@ export function DonorDashboardPage() {
         {/* ── Footer ── */}
         <footer className="border-t border-border pt-6 pb-8">
           <div className="text-center text-xs text-muted-foreground space-y-1">
-            <p className="font-semibold text-foreground">YWAMFund</p>
+            <p className="font-semibold text-foreground">YWAMKOREAFUND</p>
             <p>기부금은 예수전도단 공식 계좌를 통해 100% 선교사에게 전달됩니다.</p>
-            <p>후원 문의: support@ywamfund.org · 02-0000-0000</p>
+            <p>후원 문의: support@ywamkoreafund.org · 02-0000-0000</p>
           </div>
         </footer>
       </div>

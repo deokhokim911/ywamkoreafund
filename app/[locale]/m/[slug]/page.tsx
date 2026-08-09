@@ -23,7 +23,7 @@ export const generateMetadata = async ({ params }: PageProps) => {
   }
 
   return {
-    title: `${mission.title} | YWAMFund`,
+    title: `${mission.title} | YWAMKOREAFUND`,
     description: mission.subtitle,
   }
 }

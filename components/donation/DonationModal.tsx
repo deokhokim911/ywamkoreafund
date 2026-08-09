@@ -46,9 +46,22 @@ const DonationModalContent = ({
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
+  const [birthDate, setBirthDate] = useState('')
+  const [newsletterOptIn, setNewsletterOptIn] = useState(false)
   const [agreeAll, setAgreeAll] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const modalRef = useRef<HTMLDivElement>(null)
+
+  const isBirthDateValid = (() => {
+    if (!birthDate) return false
+    const parsed = new Date(`${birthDate}T00:00:00`)
+    if (Number.isNaN(parsed.getTime())) return false
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    return parsed <= today
+  })()
+
+  const canProceedInfo = Boolean(name.trim() && phone.length >= 12 && isBirthDateValid)
 
   const finalAmount = customAmount
     ? parseInt(customAmount.replace(/[^0-9]/g, ''), 10) || 0
@@ -317,6 +330,43 @@ const DonationModalContent = ({
                     className="w-full border-2 border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-colors bg-card"
                   />
                 </div>
+                <div>
+                  <label htmlFor="donor-birthdate" className="text-sm font-medium text-foreground block mb-1.5">
+                    생년월일 <span className="text-destructive">*</span>
+                  </label>
+                  <input
+                    id="donor-birthdate"
+                    type="date"
+                    value={birthDate}
+                    max={new Date().toISOString().slice(0, 10)}
+                    onChange={(e) => setBirthDate(e.target.value)}
+                    className="w-full border-2 border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-colors bg-card"
+                    aria-required="true"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1.5">
+                    기부금 영수증·연령 확인에 사용됩니다.
+                  </p>
+                </div>
+                <label
+                  htmlFor="donor-newsletter"
+                  className="flex items-start gap-3 cursor-pointer rounded-xl border-2 border-border p-3.5 hover:border-primary/40 has-[:checked]:border-primary has-[:checked]:bg-primary/5 transition-colors"
+                >
+                  <input
+                    id="donor-newsletter"
+                    type="checkbox"
+                    checked={newsletterOptIn}
+                    onChange={(e) => setNewsletterOptIn(e.target.checked)}
+                    className="mt-0.5 accent-primary w-4 h-4 flex-shrink-0"
+                  />
+                  <span className="min-w-0">
+                    <span className="block text-sm font-medium text-foreground">
+                      뉴스레터 구독 (선택)
+                    </span>
+                    <span className="block text-xs text-muted-foreground mt-1 leading-relaxed">
+                      사역 소식·캠페인 안내 메일을 받아봅니다. 언제든 수신 거부할 수 있습니다.
+                    </span>
+                  </span>
+                </label>
               </div>
 
               {/* Anonymous option note */}
@@ -325,8 +375,9 @@ const DonationModalContent = ({
               </p>
 
               <button
+                type="button"
                 onClick={handleNext}
-                disabled={!name || phone.length < 12}
+                disabled={!canProceedInfo}
                 className="w-full bg-primary hover:bg-[oklch(0.44_0.12_195)] text-primary-foreground font-bold text-base py-4 rounded-xl transition-colors shadow-sm disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 다음 단계
@@ -365,6 +416,20 @@ const DonationModalContent = ({
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">후원자</span>
                   <span className="font-semibold text-foreground">{name}</span>
+                </div>
+                <div className="h-px bg-border" />
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">생년월일</span>
+                  <span className="font-semibold text-foreground">
+                    {birthDate.replace(/-/g, '.')}
+                  </span>
+                </div>
+                <div className="h-px bg-border" />
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">뉴스레터</span>
+                  <span className="font-semibold text-foreground">
+                    {newsletterOptIn ? '구독' : '미구독'}
+                  </span>
                 </div>
               </div>
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import {
   TrendingUp,
@@ -22,6 +22,7 @@ import {
   XCircle,
   ChevronLeft,
   ChevronRight,
+  LayoutGrid,
 } from 'lucide-react'
 import {
   AreaChart,
@@ -44,40 +45,111 @@ const MISSIONARY = {
   avatarInitial: '김',
 }
 
-const KPI = [
+type CampaignStatus = 'active' | 'urgent' | 'ended' | 'pending'
+
+type Campaign = {
+  id: string
+  slug: string
+  title: string
+  country: string
+  status: CampaignStatus
+  currentAmount: number
+  goalAmount: number
+  donorCount: number
+  recurringCount: number
+  daysLeft: number | null
+  monthRaised: number
+  newDonorsThisMonth: number
+}
+
+const CAMPAIGNS: Campaign[] = [
   {
-    label: '총 모금액',
-    value: '₩ 4,240,000',
-    sub: '목표의 53%',
-    change: +12.4,
-    icon: TrendingUp,
-    positive: true,
+    id: 'c1',
+    slug: 'thailand-literacy',
+    title: '동남아시아 어린이 문해교육 및 복음화 사역',
+    country: '태국',
+    status: 'active',
+    currentAmount: 4_240_000,
+    goalAmount: 8_000_000,
+    donorCount: 134,
+    recurringCount: 61,
+    daysLeft: 47,
+    monthRaised: 1_840_000,
+    newDonorsThisMonth: 18,
   },
   {
-    label: '전체 후원자',
-    value: '134명',
-    sub: '이번 달 +18명',
-    change: +15.5,
-    icon: Users,
-    positive: true,
+    id: 'c2',
+    slug: 'thailand-youth',
+    title: '치앙마이 청년 제자훈련 캠프',
+    country: '태국',
+    status: 'urgent',
+    currentAmount: 1_850_000,
+    goalAmount: 3_000_000,
+    donorCount: 52,
+    recurringCount: 19,
+    daysLeft: 12,
+    monthRaised: 620_000,
+    newDonorsThisMonth: 9,
   },
   {
-    label: '목표 금액',
-    value: '₩ 8,000,000',
-    sub: '47일 남음',
-    change: null,
-    icon: Target,
-    positive: null,
+    id: 'c3',
+    slug: 'thailand-library',
+    title: '산간 마을 작은 도서관 조성',
+    country: '태국',
+    status: 'ended',
+    currentAmount: 2_100_000,
+    goalAmount: 2_000_000,
+    donorCount: 78,
+    recurringCount: 0,
+    daysLeft: null,
+    monthRaised: 0,
+    newDonorsThisMonth: 0,
   },
   {
-    label: '정기 후원자',
-    value: '61명',
-    sub: '전체의 45%',
-    change: +8.2,
-    icon: RefreshCw,
-    positive: true,
+    id: 'c4',
+    slug: 'thailand-medical',
+    title: '북부 의료 봉사 단기 사역',
+    country: '태국',
+    status: 'pending',
+    currentAmount: 0,
+    goalAmount: 5_000_000,
+    donorCount: 0,
+    recurringCount: 0,
+    daysLeft: null,
+    monthRaised: 0,
+    newDonorsThisMonth: 0,
   },
 ]
+
+const CAMPAIGN_STATUS_FILTERS: Array<{ id: 'all' | CampaignStatus; label: string }> = [
+  { id: 'all', label: '전체' },
+  { id: 'active', label: '진행중' },
+  { id: 'urgent', label: '긴급' },
+  { id: 'ended', label: '종료' },
+  { id: 'pending', label: '검토중' },
+]
+
+const CAMPAIGN_STATUS_META: Record<
+  CampaignStatus,
+  { label: string; className: string }
+> = {
+  active: {
+    label: '진행중',
+    className: 'bg-accent text-accent-foreground',
+  },
+  urgent: {
+    label: '긴급',
+    className: 'bg-[oklch(0.96_0.05_80)] text-[oklch(0.45_0.14_60)]',
+  },
+  ended: {
+    label: '종료',
+    className: 'bg-muted text-muted-foreground',
+  },
+  pending: {
+    label: '검토중',
+    className: 'bg-secondary text-secondary-foreground',
+  },
+}
 
 const WEEKLY_DATA = [
   { week: '6/16', amount: 280_000, donors: 9 },
@@ -91,6 +163,7 @@ const WEEKLY_DATA = [
 
 const DONORS: {
   id: string
+  campaignId: string
   name: string
   email: string
   phone: string
@@ -99,19 +172,21 @@ const DONORS: {
   date: string
   status: 'confirmed' | 'pending' | 'cancelled'
 }[] = [
-  { id: 'd1', name: '이수현', email: 'lee.suhyun@gmail.com', phone: '010-1234-5678', amount: 50_000, type: '정기', date: '2025-07-16', status: 'confirmed' },
-  { id: 'd2', name: '박지훈', email: 'jhpark@naver.com', phone: '010-2345-6789', amount: 30_000, type: '일시', date: '2025-07-15', status: 'confirmed' },
-  { id: 'd3', name: '김민지', email: 'minji.kim@kakao.com', phone: '010-3456-7890', amount: 100_000, type: '정기', date: '2025-07-14', status: 'confirmed' },
-  { id: 'd4', name: '최유진', email: 'yujin.choi@daum.net', phone: '010-4567-8901', amount: 10_000, type: '일시', date: '2025-07-13', status: 'pending' },
-  { id: 'd5', name: '정성훈', email: 'sunghoon@gmail.com', phone: '010-5678-9012', amount: 50_000, type: '정기', date: '2025-07-12', status: 'confirmed' },
-  { id: 'd6', name: '한예진', email: 'yejin.han@naver.com', phone: '010-6789-0123', amount: 20_000, type: '일시', date: '2025-07-11', status: 'confirmed' },
-  { id: 'd7', name: '오민준', email: 'minjun.oh@outlook.com', phone: '010-7890-1234', amount: 30_000, type: '정기', date: '2025-07-10', status: 'cancelled' },
-  { id: 'd8', name: '윤서연', email: 'seoyeon.yun@gmail.com', phone: '010-8901-2345', amount: 50_000, type: '일시', date: '2025-07-09', status: 'confirmed' },
-  { id: 'd9', name: '강도현', email: 'dohyun.kang@daum.net', phone: '010-9012-3456', amount: 100_000, type: '정기', date: '2025-07-08', status: 'confirmed' },
-  { id: 'd10', name: '임지수', email: 'jisoo.lim@naver.com', phone: '010-0123-4567', amount: 30_000, type: '일시', date: '2025-07-07', status: 'confirmed' },
-  { id: 'd11', name: '신현우', email: 'hyunwoo.shin@gmail.com', phone: '010-1357-2468', amount: 50_000, type: '정기', date: '2025-07-06', status: 'confirmed' },
-  { id: 'd12', name: '배소영', email: 'soyoung.bae@kakao.com', phone: '010-2468-1357', amount: 20_000, type: '일시', date: '2025-07-05', status: 'pending' },
+  { id: 'd1', campaignId: 'c1', name: '이수현', email: 'lee.suhyun@gmail.com', phone: '010-1234-5678', amount: 50_000, type: '정기', date: '2025-07-16', status: 'confirmed' },
+  { id: 'd2', campaignId: 'c1', name: '박지훈', email: 'jhpark@naver.com', phone: '010-2345-6789', amount: 30_000, type: '일시', date: '2025-07-15', status: 'confirmed' },
+  { id: 'd3', campaignId: 'c2', name: '김민지', email: 'minji.kim@kakao.com', phone: '010-3456-7890', amount: 100_000, type: '정기', date: '2025-07-14', status: 'confirmed' },
+  { id: 'd4', campaignId: 'c2', name: '최유진', email: 'yujin.choi@daum.net', phone: '010-4567-8901', amount: 10_000, type: '일시', date: '2025-07-13', status: 'pending' },
+  { id: 'd5', campaignId: 'c1', name: '정성훈', email: 'sunghoon@gmail.com', phone: '010-5678-9012', amount: 50_000, type: '정기', date: '2025-07-12', status: 'confirmed' },
+  { id: 'd6', campaignId: 'c3', name: '한예진', email: 'yejin.han@naver.com', phone: '010-6789-0123', amount: 20_000, type: '일시', date: '2025-07-11', status: 'confirmed' },
+  { id: 'd7', campaignId: 'c1', name: '오민준', email: 'minjun.oh@outlook.com', phone: '010-7890-1234', amount: 30_000, type: '정기', date: '2025-07-10', status: 'cancelled' },
+  { id: 'd8', campaignId: 'c2', name: '윤서연', email: 'seoyeon.yun@gmail.com', phone: '010-8901-2345', amount: 50_000, type: '일시', date: '2025-07-09', status: 'confirmed' },
+  { id: 'd9', campaignId: 'c1', name: '강도현', email: 'dohyun.kang@daum.net', phone: '010-9012-3456', amount: 100_000, type: '정기', date: '2025-07-08', status: 'confirmed' },
+  { id: 'd10', campaignId: 'c3', name: '임지수', email: 'jisoo.lim@naver.com', phone: '010-0123-4567', amount: 30_000, type: '일시', date: '2025-07-07', status: 'confirmed' },
+  { id: 'd11', campaignId: 'c2', name: '신현우', email: 'hyunwoo.shin@gmail.com', phone: '010-1357-2468', amount: 50_000, type: '정기', date: '2025-07-06', status: 'confirmed' },
+  { id: 'd12', campaignId: 'c1', name: '배소영', email: 'soyoung.bae@kakao.com', phone: '010-2468-1357', amount: 20_000, type: '일시', date: '2025-07-05', status: 'pending' },
 ]
+
+const formatKRW = (amount: number) => `₩ ${amount.toLocaleString()}`
 
 const PAGE_SIZE = 8
 
@@ -152,16 +227,107 @@ export function MissionaryDashboardPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [typeFilter, setTypeFilter] = useState<'전체' | '일시' | '정기'>('전체')
   const [statusFilter, setStatusFilter] = useState<'전체' | 'confirmed' | 'pending' | 'cancelled'>('전체')
+  const [campaignStatusFilter, setCampaignStatusFilter] = useState<'all' | CampaignStatus>('all')
+  const [selectedCampaignId, setSelectedCampaignId] = useState<'all' | string>('all')
   const [page, setPage] = useState(1)
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
 
-  const progress = Math.round((4_240_000 / 8_000_000) * 100)
+  const classifiedCampaigns = useMemo(() => {
+    if (campaignStatusFilter === 'all') return CAMPAIGNS
+    return CAMPAIGNS.filter((c) => c.status === campaignStatusFilter)
+  }, [campaignStatusFilter])
+
+  const statusCounts = useMemo(() => {
+    return CAMPAIGNS.reduce(
+      (acc, c) => {
+        acc.all += 1
+        acc[c.status] += 1
+        return acc
+      },
+      { all: 0, active: 0, urgent: 0, ended: 0, pending: 0 } as Record<'all' | CampaignStatus, number>,
+    )
+  }, [])
+
+  const scopeCampaigns = useMemo(() => {
+    if (selectedCampaignId === 'all') return classifiedCampaigns
+    return CAMPAIGNS.filter((c) => c.id === selectedCampaignId)
+  }, [classifiedCampaigns, selectedCampaignId])
+
+  const selectedCampaign =
+    selectedCampaignId === 'all'
+      ? null
+      : CAMPAIGNS.find((c) => c.id === selectedCampaignId) ?? null
+
+  const scopeTotals = useMemo(() => {
+    const currentAmount = scopeCampaigns.reduce((s, c) => s + c.currentAmount, 0)
+    const goalAmount = scopeCampaigns.reduce((s, c) => s + c.goalAmount, 0)
+    const donorCount = scopeCampaigns.reduce((s, c) => s + c.donorCount, 0)
+    const recurringCount = scopeCampaigns.reduce((s, c) => s + c.recurringCount, 0)
+    const monthRaised = scopeCampaigns.reduce((s, c) => s + c.monthRaised, 0)
+    const newDonorsThisMonth = scopeCampaigns.reduce((s, c) => s + c.newDonorsThisMonth, 0)
+    const progress = goalAmount > 0 ? Math.round((currentAmount / goalAmount) * 100) : 0
+    return {
+      currentAmount,
+      goalAmount,
+      donorCount,
+      recurringCount,
+      monthRaised,
+      newDonorsThisMonth,
+      progress,
+    }
+  }, [scopeCampaigns])
+
+  const kpiCards = [
+    {
+      label: '총 모금액',
+      value: formatKRW(scopeTotals.currentAmount),
+      sub: scopeTotals.goalAmount > 0 ? `목표의 ${scopeTotals.progress}%` : '목표 없음',
+      change: 12.4,
+      icon: TrendingUp,
+      positive: true as boolean | null,
+    },
+    {
+      label: '전체 후원자',
+      value: `${scopeTotals.donorCount}명`,
+      sub: `이번 달 +${scopeTotals.newDonorsThisMonth}명`,
+      change: 15.5,
+      icon: Users,
+      positive: true as boolean | null,
+    },
+    {
+      label: '목표 금액',
+      value: formatKRW(scopeTotals.goalAmount),
+      sub:
+        selectedCampaign?.daysLeft != null
+          ? `${selectedCampaign.daysLeft}일 남음`
+          : selectedCampaignId === 'all'
+            ? `${scopeCampaigns.length}개 캠페인`
+            : '종료/검토',
+      change: null,
+      icon: Target,
+      positive: null as boolean | null,
+    },
+    {
+      label: '정기 후원자',
+      value: `${scopeTotals.recurringCount}명`,
+      sub:
+        scopeTotals.donorCount > 0
+          ? `전체의 ${Math.round((scopeTotals.recurringCount / scopeTotals.donorCount) * 100)}%`
+          : '0%',
+      change: 8.2,
+      icon: RefreshCw,
+      positive: true as boolean | null,
+    },
+  ]
+
+  const scopeCampaignIds = new Set(scopeCampaigns.map((c) => c.id))
 
   const filtered = DONORS.filter((d) => {
+    const matchesCampaign = scopeCampaignIds.has(d.campaignId)
     const matchesSearch = !searchQuery || d.name.includes(searchQuery) || d.email.includes(searchQuery)
     const matchesType = typeFilter === '전체' || d.type === typeFilter
     const matchesStatus = statusFilter === '전체' || d.status === statusFilter
-    return matchesSearch && matchesType && matchesStatus
+    return matchesCampaign && matchesSearch && matchesType && matchesStatus
   })
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
@@ -170,6 +336,17 @@ export function MissionaryDashboardPage() {
   const totalAmount = filtered
     .filter((d) => d.status === 'confirmed')
     .reduce((sum, d) => sum + d.amount, 0)
+
+  const handleSelectCampaignStatus = (id: 'all' | CampaignStatus) => {
+    setCampaignStatusFilter(id)
+    setSelectedCampaignId('all')
+    setPage(1)
+  }
+
+  const handleSelectCampaign = (id: 'all' | string) => {
+    setSelectedCampaignId(id)
+    setPage(1)
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -191,7 +368,7 @@ export function MissionaryDashboardPage() {
                 </span>
               </div>
               <p className="text-sm text-muted-foreground mt-0.5">
-                {MISSIONARY.organization} · {MISSIONARY.country} · {MISSIONARY.deployYear}년 파송
+                {MISSIONARY.organization} · {MISSIONARY.country} · {MISSIONARY.deployYear}년 파송 · 캠페인 {CAMPAIGNS.length}개
               </p>
             </div>
           </div>
@@ -204,9 +381,133 @@ export function MissionaryDashboardPage() {
           </Link>
         </div>
 
+        {/* Campaign classification */}
+        <section className="bg-card rounded-2xl border border-border p-5 md:p-6 shadow-sm space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center">
+                <LayoutGrid size={18} className="text-primary" aria-hidden="true" />
+              </div>
+              <div>
+                <h2 className="font-bold text-foreground">내 캠페인</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  상태별로 분류하고 캠페인을 선택해 현황을 확인하세요
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleSelectCampaign('all')}
+              className={cn(
+                'text-xs font-semibold px-3 py-2 rounded-xl transition-colors self-start sm:self-auto',
+                selectedCampaignId === 'all'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+              )}
+            >
+              전체 합계 보기
+            </button>
+          </div>
+
+          <div
+            className="flex items-center gap-2 flex-wrap"
+            role="tablist"
+            aria-label="캠페인 상태 분류"
+          >
+            {CAMPAIGN_STATUS_FILTERS.map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                role="tab"
+                aria-selected={campaignStatusFilter === f.id}
+                onClick={() => handleSelectCampaignStatus(f.id)}
+                className={cn(
+                  'px-3 py-1.5 rounded-full text-xs font-semibold transition-colors',
+                  campaignStatusFilter === f.id
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+                )}
+              >
+                {f.label}
+                <span className="ml-1 opacity-80">({statusCounts[f.id]})</span>
+              </button>
+            ))}
+          </div>
+
+          {classifiedCampaigns.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {classifiedCampaigns.map((campaign) => {
+                const pct =
+                  campaign.goalAmount > 0
+                    ? Math.min(
+                        100,
+                        Math.round((campaign.currentAmount / campaign.goalAmount) * 100),
+                      )
+                    : 0
+                const selected = selectedCampaignId === campaign.id
+                const meta = CAMPAIGN_STATUS_META[campaign.status]
+
+                return (
+                  <button
+                    key={campaign.id}
+                    type="button"
+                    onClick={() => handleSelectCampaign(campaign.id)}
+                    className={cn(
+                      'text-left rounded-xl border p-4 transition-all',
+                      selected
+                        ? 'border-primary bg-primary/5 shadow-sm'
+                        : 'border-border bg-background hover:border-primary/40 hover:bg-muted/40',
+                    )}
+                    aria-pressed={selected}
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <p className="text-sm font-bold text-foreground leading-snug line-clamp-2">
+                        {campaign.title}
+                      </p>
+                      <span
+                        className={cn(
+                          'flex-shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full',
+                          meta.className,
+                        )}
+                      >
+                        {meta.label}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-3">
+                      {campaign.country}
+                      {campaign.daysLeft != null ? ` · ${campaign.daysLeft}일 남음` : ''}
+                      {campaign.status === 'ended' ? ' · 모금 종료' : ''}
+                      {campaign.status === 'pending' ? ' · 승인 대기' : ''}
+                    </p>
+                    <div className="flex items-center gap-3 mb-1.5">
+                      <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-primary rounded-full"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                      <span className="text-xs font-bold text-primary tabular-nums w-9 text-right">
+                        {pct}%
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>{formatKRW(campaign.currentAmount)}</span>
+                      <span>후원자 {campaign.donorCount}명</span>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="rounded-xl border border-dashed border-border py-10 text-center text-sm text-muted-foreground">
+              해당 상태의 캠페인이 없습니다.
+            </div>
+          )}
+        </section>
+
         {/* KPI cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {KPI.map((kpi) => (
+          {kpiCards.map((kpi) => (
             <div key={kpi.label} className="bg-card rounded-2xl border border-border p-5 shadow-sm">
               <div className="flex items-start justify-between mb-3">
                 <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center flex-shrink-0">
@@ -220,7 +521,7 @@ export function MissionaryDashboardPage() {
                       : 'bg-[oklch(0.96_0.04_27)] text-[oklch(0.50_0.16_27)]'
                   )}>
                     <ChevronDown size={12} className={kpi.positive ? 'rotate-180' : ''} />
-                    {Math.abs(kpi.change!)}%
+                    {Math.abs(kpi.change)}%
                   </div>
                 )}
               </div>
@@ -233,30 +534,46 @@ export function MissionaryDashboardPage() {
 
         {/* Progress bar card */}
         <div className="bg-card rounded-2xl border border-border p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="font-bold text-foreground">동남아시아 어린이 문해교육 및 복음화 사역</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">태국 · 예수전도단 · 마감 47일 전</p>
+          <div className="flex items-center justify-between mb-4 gap-3">
+            <div className="min-w-0">
+              <h2 className="font-bold text-foreground truncate">
+                {selectedCampaign?.title ?? '선택 범위 합계'}
+              </h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {selectedCampaign
+                  ? `${selectedCampaign.country} · ${CAMPAIGN_STATUS_META[selectedCampaign.status].label}${
+                      selectedCampaign.daysLeft != null
+                        ? ` · 마감 ${selectedCampaign.daysLeft}일 전`
+                        : ''
+                    }`
+                  : campaignStatusFilter === 'all'
+                    ? `전체 캠페인 ${scopeCampaigns.length}개`
+                    : `${CAMPAIGN_STATUS_FILTERS.find((f) => f.id === campaignStatusFilter)?.label} ${scopeCampaigns.length}개`}
+              </p>
             </div>
-            <Link
-              href="/mission"
-              className="flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-            >
-              페이지 보기 <ArrowUpRight size={12} />
-            </Link>
+            {selectedCampaign && (
+              <Link
+                href={`/m/${selectedCampaign.slug}`}
+                className="flex items-center gap-1 text-xs font-semibold text-primary hover:underline flex-shrink-0"
+              >
+                페이지 보기 <ArrowUpRight size={12} />
+              </Link>
+            )}
           </div>
           <div className="flex items-center gap-4 mb-2">
             <div className="flex-1 h-3 bg-muted rounded-full overflow-hidden">
               <div
                 className="h-full bg-primary rounded-full transition-all duration-700"
-                style={{ width: `${progress}%` }}
+                style={{ width: `${scopeTotals.progress}%` }}
               />
             </div>
-            <span className="text-sm font-bold text-primary w-10 text-right">{progress}%</span>
+            <span className="text-sm font-bold text-primary w-10 text-right">
+              {scopeTotals.progress}%
+            </span>
           </div>
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>₩ 4,240,000 모금됨</span>
-            <span>목표 ₩ 8,000,000</span>
+            <span>{formatKRW(scopeTotals.currentAmount)} 모금됨</span>
+            <span>목표 {formatKRW(scopeTotals.goalAmount)}</span>
           </div>
         </div>
 
@@ -325,10 +642,23 @@ export function MissionaryDashboardPage() {
               <h3 className="font-bold text-foreground mb-4">후원 유형 분포</h3>
               <div className="space-y-3">
                 {[
-                  { label: '정기 후원', count: 61, total: 134, color: 'bg-primary' },
-                  { label: '일시 후원', count: 73, total: 134, color: 'bg-[oklch(0.78_0.14_80)]' },
+                  {
+                    label: '정기 후원',
+                    count: scopeTotals.recurringCount,
+                    total: Math.max(scopeTotals.donorCount, 1),
+                    color: 'bg-primary',
+                  },
+                  {
+                    label: '일시 후원',
+                    count: Math.max(scopeTotals.donorCount - scopeTotals.recurringCount, 0),
+                    total: Math.max(scopeTotals.donorCount, 1),
+                    color: 'bg-[oklch(0.78_0.14_80)]',
+                  },
                 ].map((item) => {
-                  const pct = Math.round((item.count / item.total) * 100)
+                  const pct =
+                    scopeTotals.donorCount > 0
+                      ? Math.round((item.count / scopeTotals.donorCount) * 100)
+                      : 0
                   return (
                     <div key={item.label}>
                       <div className="flex justify-between text-xs mb-1.5">
@@ -348,10 +678,19 @@ export function MissionaryDashboardPage() {
               <h3 className="font-bold text-foreground mb-3">이번 달 요약</h3>
               <div className="space-y-2.5">
                 {[
-                  { label: '신규 후원자', value: '+18명' },
-                  { label: '이번 달 모금', value: '₩ 1,840,000' },
-                  { label: '후원 취소', value: '2건' },
-                  { label: '평균 후원액', value: '₩ 31,640' },
+                  { label: '신규 후원자', value: `+${scopeTotals.newDonorsThisMonth}명` },
+                  { label: '이번 달 모금', value: formatKRW(scopeTotals.monthRaised) },
+                  {
+                    label: '후원 취소',
+                    value: `${DONORS.filter((d) => scopeCampaignIds.has(d.campaignId) && d.status === 'cancelled').length}건`,
+                  },
+                  {
+                    label: '평균 후원액',
+                    value:
+                      scopeTotals.donorCount > 0
+                        ? formatKRW(Math.round(scopeTotals.currentAmount / scopeTotals.donorCount))
+                        : formatKRW(0),
+                  },
                 ].map((item) => (
                   <div key={item.label} className="flex justify-between items-center">
                     <span className="text-xs text-muted-foreground">{item.label}</span>
@@ -370,7 +709,9 @@ export function MissionaryDashboardPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h2 className="font-bold text-foreground">후원자 목록</h2>
-                <p className="text-xs text-muted-foreground mt-0.5">총 {filtered.length}명 · 확인된 합계 {totalAmount.toLocaleString()}원</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {selectedCampaign ? selectedCampaign.title : '선택 범위'} · 총 {filtered.length}명 · 확인된 합계 {totalAmount.toLocaleString()}원
+                </p>
               </div>
               <button className="flex items-center gap-2 bg-muted hover:bg-border text-foreground text-xs font-semibold px-3 py-2 rounded-xl transition-colors self-start sm:self-auto">
                 <Download size={13} />
@@ -390,40 +731,67 @@ export function MissionaryDashboardPage() {
                   className="w-full pl-8 pr-3 py-2 text-sm bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground"
                 />
               </div>
-              <div className="flex items-center gap-2">
-                <Filter size={13} className="text-muted-foreground flex-shrink-0" />
-                {(['전체', '정기', '일시'] as const).map((f) => (
+              <div className="flex items-center gap-2 flex-wrap" role="group" aria-label="후원자 목록 필터">
+                <Filter size={13} className="text-muted-foreground flex-shrink-0" aria-hidden="true" />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTypeFilter('전체')
+                    setStatusFilter('전체')
+                    setPage(1)
+                  }}
+                  className={cn(
+                    'px-3 py-1.5 rounded-full text-xs font-semibold transition-colors',
+                    typeFilter === '전체' && statusFilter === '전체'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+                  )}
+                >
+                  전체
+                </button>
+                {(['정기', '일시'] as const).map((f) => (
                   <button
                     key={f}
-                    onClick={() => { setTypeFilter(f); setPage(1) }}
+                    type="button"
+                    onClick={() => {
+                      setTypeFilter(f)
+                      setPage(1)
+                    }}
                     className={cn(
                       'px-3 py-1.5 rounded-full text-xs font-semibold transition-colors',
                       typeFilter === f
                         ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                        : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground',
                     )}
                   >
                     {f}
                   </button>
                 ))}
-                <div className="w-px h-4 bg-border" />
-                {(['전체', 'confirmed', 'pending', 'cancelled'] as const).map((f) => {
-                  const label = f === '전체' ? '전체' : f === 'confirmed' ? '확인' : f === 'pending' ? '대기' : '취소'
-                  return (
-                    <button
-                      key={f}
-                      onClick={() => { setStatusFilter(f); setPage(1) }}
-                      className={cn(
-                        'px-3 py-1.5 rounded-full text-xs font-semibold transition-colors',
-                        statusFilter === f
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                      )}
-                    >
-                      {label}
-                    </button>
-                  )
-                })}
+                <div className="w-px h-4 bg-border" aria-hidden="true" />
+                {(
+                  [
+                    { id: 'confirmed' as const, label: '확인' },
+                    { id: 'pending' as const, label: '대기' },
+                    { id: 'cancelled' as const, label: '취소' },
+                  ]
+                ).map((f) => (
+                  <button
+                    key={f.id}
+                    type="button"
+                    onClick={() => {
+                      setStatusFilter(f.id)
+                      setPage(1)
+                    }}
+                    className={cn(
+                      'px-3 py-1.5 rounded-full text-xs font-semibold transition-colors',
+                      statusFilter === f.id
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+                    )}
+                  >
+                    {f.label}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
@@ -587,8 +955,8 @@ export function MissionaryDashboardPage() {
       {/* Footer */}
       <footer className="border-t border-border mt-8 py-8">
         <div className="max-w-6xl mx-auto px-4 text-center text-xs text-muted-foreground">
-          <p className="font-semibold text-foreground">예수전도단 (YWAM Korea) — 선교사 포털</p>
-          <p className="mt-1">개인정보처리방침 · 이용약관 · 문의: support@ywam.or.kr</p>
+          <p className="font-semibold text-foreground">YWAMKOREAFUND — 선교사 포털</p>
+          <p className="mt-1">개인정보처리방침 · 이용약관 · 문의: support@ywamkoreafund.org</p>
         </div>
       </footer>
     </div>

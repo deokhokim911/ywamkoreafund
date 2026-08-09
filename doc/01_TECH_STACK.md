@@ -39,7 +39,7 @@
 | 앱 프레임워크 | Next.js 16 · React 19 · TypeScript | 프로토타입 사용 중 → 프로덕션 유지 |
 | UI | Tailwind 4 · CVA · lucide · shadcn(base-nova) | 프로토타입 사용 중 |
 | i18n | next-intl (`ko`/`en`) | **D0 도입** |
-| Auth | Better Auth + Kakao OAuth | **D2** |
+| Auth | Better Auth + **Kakao · Google** OAuth | **D2** (v7) |
 | DB | PostgreSQL + Drizzle | **Supabase ✅ (D0~)** · Docker는 선택 |
 | 결제 | Toss Payments (`PaymentProvider`) | **Phase 1 ✅** · Stripe는 D5 후보 |
 | 이메일 | Resend | D2~D3 |
@@ -410,7 +410,7 @@ App Router + `[locale]` · `proxy.ts` · Better Auth(Kakao) · `requireAuth` · 
 | 항목 | TheSentAsset | YWAMFund |
 |------|--------------|----------|
 | 도메인 | 자산·구매·승인 | 미션 후원·결제 |
-| OAuth | Google (Kakao stub) | **Kakao 필수** |
+| OAuth | Google (Kakao stub) | **Kakao + Google** (v7) |
 | DB 호스팅 | VPS Postgres 전형 | **Supabase** ✅ (D0~ · Docker 선택) |
 | 결제 | 없음 | **Toss ✅** (+ Stripe 후보) |
 | 공개 페이지 | 거의 없음 | 미션 공개·SEO·QR |

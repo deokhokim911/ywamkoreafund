@@ -1,19 +1,22 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Menu, X } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import { Link, usePathname } from '@/i18n/navigation'
 import { useAuthStub, type DemoRole } from '@/lib/auth-stub'
 import { cn } from '@/lib/utils'
+import { BrandLogo } from './BrandLogo'
 
-const NAV_HREFS = [
-  { href: '/', key: 'home' as const },
-  { href: '/my', key: 'my' as const },
-  { href: '/dashboard', key: 'dashboard' as const },
-  { href: '/create', key: 'create' as const },
-  { href: '/support', key: 'support' as const },
+type NavKey = 'home' | 'my' | 'dashboard' | 'create' | 'support'
+
+const NAV_HREFS: Array<{ href: string; key: NavKey; roles: DemoRole[] }> = [
+  { href: '/', key: 'home', roles: ['guest', 'donor', 'missionary', 'admin'] },
+  { href: '/my', key: 'my', roles: ['donor', 'admin'] },
+  { href: '/dashboard', key: 'dashboard', roles: ['missionary', 'admin'] },
+  { href: '/create', key: 'create', roles: ['missionary', 'admin'] },
+  { href: '/support', key: 'support', roles: ['guest', 'donor', 'missionary', 'admin'] },
 ]
 
 const ROLE_OPTIONS: DemoRole[] = ['guest', 'donor', 'missionary', 'admin']
@@ -27,23 +30,21 @@ export function Navbar() {
 
   const handleCloseMobile = () => setMobileOpen(false)
 
+  const visibleLinks = useMemo(
+    () => NAV_HREFS.filter((link) => link.roles.includes(role)),
+    [role],
+  )
+
+  const showAdminLink = role === 'admin'
+  const showDonateCta = role === 'guest' || role === 'donor'
+
   return (
     <header className="sticky top-0 z-30 bg-card/95 backdrop-blur-md border-b border-border">
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between gap-2">
-        <Link
-          href="/"
-          className="flex items-center gap-2 group"
-          aria-label="YWAMFund home"
-          onClick={handleCloseMobile}
-        >
-          <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
-            <span className="text-xs font-bold text-primary-foreground">Y</span>
-          </div>
-          <span className="font-bold text-foreground text-sm">YWAMFund</span>
-        </Link>
+        <BrandLogo onClick={handleCloseMobile} />
 
         <nav className="hidden md:flex items-center gap-1" aria-label={t('mainMenu')}>
-          {NAV_HREFS.map((link) => (
+          {visibleLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -60,8 +61,8 @@ export function Navbar() {
         </nav>
 
         <div className="flex items-center gap-1.5 sm:gap-2">
-          <label className="hidden lg:flex items-center gap-1 text-xs text-muted-foreground">
-            <span className="sr-only">{t('demoRole')}</span>
+          <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span className="hidden sm:inline">{t('demoRole')}</span>
             <select
               value={role}
               onChange={(e) => setRole(e.target.value as DemoRole)}
@@ -70,7 +71,7 @@ export function Navbar() {
             >
               {ROLE_OPTIONS.map((r) => (
                 <option key={r} value={r}>
-                  {r}
+                  {t(`roles.${r}`)}
                 </option>
               ))}
             </select>
@@ -78,23 +79,27 @@ export function Navbar() {
 
           <LocaleSwitcher currentLocale={locale} />
 
-          <Link
-            href="/admin"
-            className={cn(
-              'hidden sm:inline-flex text-sm font-medium px-3 py-1.5 rounded-lg transition-colors',
-              pathname === '/admin'
-                ? 'bg-accent text-accent-foreground'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted',
-            )}
-          >
-            {t('admin')}
-          </Link>
-          <Link
-            href="/m/thailand-literacy"
-            className="hidden md:flex bg-primary hover:bg-[oklch(0.44_0.12_195)] text-primary-foreground text-sm font-semibold px-4 py-2 rounded-xl transition-colors"
-          >
-            {t('donate')}
-          </Link>
+          {showAdminLink && (
+            <Link
+              href="/admin"
+              className={cn(
+                'hidden sm:inline-flex text-sm font-medium px-3 py-1.5 rounded-lg transition-colors',
+                pathname === '/admin'
+                  ? 'bg-accent text-accent-foreground'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted',
+              )}
+            >
+              {t('admin')}
+            </Link>
+          )}
+          {showDonateCta && (
+            <Link
+              href="/m/thailand-literacy"
+              className="hidden md:flex bg-primary hover:bg-[oklch(0.44_0.12_195)] text-primary-foreground text-sm font-semibold px-4 py-2 rounded-xl transition-colors"
+            >
+              {t('donate')}
+            </Link>
+          )}
 
           <button
             type="button"
@@ -113,7 +118,7 @@ export function Navbar() {
           className="md:hidden border-t border-border bg-card px-4 py-3 space-y-1"
           aria-label={t('mainMenu')}
         >
-          {NAV_HREFS.map((link) => (
+          {visibleLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -128,20 +133,24 @@ export function Navbar() {
               {t(link.key)}
             </Link>
           ))}
-          <Link
-            href="/admin"
-            onClick={handleCloseMobile}
-            className="block px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted"
-          >
-            {t('admin')}
-          </Link>
-          <Link
-            href="/m/thailand-literacy"
-            onClick={handleCloseMobile}
-            className="block px-3 py-2.5 rounded-lg text-sm font-semibold bg-primary text-primary-foreground text-center"
-          >
-            {t('donate')}
-          </Link>
+          {showAdminLink && (
+            <Link
+              href="/admin"
+              onClick={handleCloseMobile}
+              className="block px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted"
+            >
+              {t('admin')}
+            </Link>
+          )}
+          {showDonateCta && (
+            <Link
+              href="/m/thailand-literacy"
+              onClick={handleCloseMobile}
+              className="block px-3 py-2.5 rounded-lg text-sm font-semibold bg-primary text-primary-foreground text-center"
+            >
+              {t('donate')}
+            </Link>
+          )}
         </nav>
       )}
     </header>

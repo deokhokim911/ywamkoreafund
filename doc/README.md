@@ -1,9 +1,11 @@
-# YWAMFund 개발 문서 인덱스
+# YWAMFund / YWAMKoreaFund 개발 문서 인덱스
 
-> **프로젝트명(가칭):** YWAMFund / MissionFund  
-> **유형:** 선교사 미션 후원 웹앱 (MissionFund.org · GoFundMe 유형)  
-> **기준 스택:** [01_TECH_STACK.md](./01_TECH_STACK.md) (Next.js 16 · Better Auth · Drizzle · next-intl · **Toss** · **Supabase**)  · TheSentAsset 정렬  
-> **작성일:** 2026-07-15  
+> **프로젝트명:** YWAMKoreaFund (레포·내부 약칭 YWAMFund)  
+> **도메인:** `ywamkoreafund.org`  
+> **유형:** 선교사 미션 후원 웹앱  
+> **운영:** 사단법인 예수전도단 · **개발:** JIOS  
+> **기준 스택:** [01](./01_TECH_STACK.md) — Next.js 16 · Better Auth(**Kakao+Google**) · Drizzle · next-intl · **Toss** · **Supabase**  
+> **작성일:** 2026-07-15 · **개정:** 2026-08-09 (고객 일정 v7)  
 > **지원 언어:** 한국어(ko, 기본) · 영어(en)
 
 ---
@@ -13,42 +15,44 @@
 | 문서 | 내용 |
 |------|------|
 | [00_REQUIREMENTS_ANALYSIS.md](./00_REQUIREMENTS_ANALYSIS.md) | 요구사항 분석·사용자 역할·핵심 플로우 |
-| [01_TECH_STACK.md](./01_TECH_STACK.md) | **기술 스택 상세** (레이어·패키지·ENV·단계별 도입) |
-| [02_SYSTEM_ARCHITECTURE.md](./02_SYSTEM_ARCHITECTURE.md) | 시스템 아키텍처·도메인 경계 |
-| [03_DATA_MODEL.md](./03_DATA_MODEL.md) | DB 스키마 초안(Drizzle) |
-| [04_FEATURE_SPEC.md](./04_FEATURE_SPEC.md) | 기능 상세 명세(화면·API·권한) |
-| [05_PHASE_ROADMAP.md](./05_PHASE_ROADMAP.md) | 단계별 개발 로드맵 |
-| [06_OPEN_QUESTIONS.md](./06_OPEN_QUESTIONS.md) | 개발팀·기획 확인 필요 사항 |
-| [07_CUSTOMER_QUESTIONS.md](./07_CUSTOMER_QUESTIONS.md) | **고객에게 물어볼 질문 체크리스트** |
-| [08_UI_PROTOTYPE_PLAN.md](./08_UI_PROTOTYPE_PLAN.md) | UI 프로토타입 분석·이식 계획 |
-| [09_DEVELOPMENT_PHASES.md](./09_DEVELOPMENT_PHASES.md) | UI 기반 개발 단계 (D0~D5) — **D0 완료 · D1 핵심 완료** |
-| [10_I18N_DB_PAYMENTS.md](./10_I18N_DB_PAYMENTS.md) | 다국어 · DB · 결제 — **Decision Log + 비교 이력** |
-| [11_DEV_PREPARATION.md](./11_DEV_PREPARATION.md) | **개발 사전 준비 가이드 · 체크리스트** |
-| [12_GIVEHOPE_FEATURE_MIGRATION.md](./12_GIVEHOPE_FEATURE_MIGRATION.md) | **GiveHope 레퍼런스 분석 · YWAM UI 중심 기능 마이그레이션** |
-| [ENV_YWAMFUND_PHASE0.md](./ENV_YWAMFUND_PHASE0.md) | D0 ENV · Supabase 연결 규칙 |
-| [logs/2026-07-24_DEV_LOG.md](./logs/2026-07-24_DEV_LOG.md) | **개발 로그 2026-07-24** (D0·D1) |
+| [01_TECH_STACK.md](./01_TECH_STACK.md) | **기술 스택 상세** |
+| [02_SYSTEM_ARCHITECTURE.md](./02_SYSTEM_ARCHITECTURE.md) | 시스템 아키텍처 |
+| [03_DATA_MODEL.md](./03_DATA_MODEL.md) | DB 스키마 초안 |
+| [04_FEATURE_SPEC.md](./04_FEATURE_SPEC.md) | 기능 상세 명세 |
+| [05_PHASE_ROADMAP.md](./05_PHASE_ROADMAP.md) | 단계별 로드맵 + **고객 캘린더 M1~M8** |
+| [06_OPEN_QUESTIONS.md](./06_OPEN_QUESTIONS.md) | 개발팀 확인 사항 |
+| [07_CUSTOMER_QUESTIONS.md](./07_CUSTOMER_QUESTIONS.md) | 고객 질문 · **v7 답변 반영** |
+| [08_UI_PROTOTYPE_PLAN.md](./08_UI_PROTOTYPE_PLAN.md) | UI 프로토타입 계획 |
+| [09_DEVELOPMENT_PHASES.md](./09_DEVELOPMENT_PHASES.md) | D0~D5 작업 ID — D0·D1 핵심 완료 |
+| [10_I18N_DB_PAYMENTS.md](./10_I18N_DB_PAYMENTS.md) | i18n · DB · 결제 Decision Log |
+| [11_DEV_PREPARATION.md](./11_DEV_PREPARATION.md) | 개발 사전 준비 체크리스트 |
+| [12_GIVEHOPE_FEATURE_MIGRATION.md](./12_GIVEHOPE_FEATURE_MIGRATION.md) | GiveHope 레퍼런스 마이그레이션 |
+| [13_CUSTOMER_SCHEDULE_MILESTONE_v7.md](./13_CUSTOMER_SCHEDULE_MILESTONE_v7.md) | **고객 일정·범위 SSOT (v7)** |
+| [ENV_YWAMFUND_PHASE0.md](./ENV_YWAMFUND_PHASE0.md) | D0 ENV · Supabase |
+| [logs/2026-07-24_DEV_LOG.md](./logs/2026-07-24_DEV_LOG.md) | 개발 로그 2026-07-24 |
+| [reference/YWAMKoreaFund_세부일정_마일스톤_v7.docx](./reference/YWAMKoreaFund_세부일정_마일스톤_v7.docx) | 고객 원본 일정서 |
 
 ---
 
 ## 빠른 요약
 
-1. 선교사가 미션(텍스트·이미지·YouTube/Vimeo)을 등록 → **승인 후** 공개  
-2. 후원자가 **카카오 OAuth** 로그인 → **QR/공유 링크**로 미션 접속 → **Toss**로 일시/정기 후원  
-3. 선교사·후원자·관리자 **역할별 대시보드** (모금 현황, 후원자 목록, 기부금 영수증, 세계지도)  
-4. 미션별 **Q&A / 업데이트**, 메일·메신저 메시지  
-5. Phase 1: **Toss** · DB **Supabase**(D0~) → 1E 보안·법률·라이브 → 1F 베타  
-6. **다국어** ko/en (D0~) · **Stripe는 Phase 2 후보** (비교는 [10](./10_I18N_DB_PAYMENTS.md) 보존)
+1. 선교사가 미션 등록 → **본부·선교본부 2단계 승인** 후 공개  
+2. 후원자 **카카오·구글** 로그인 → QR/링크로 미션 접속 → **Toss** 일시/정기 후원  
+3. 선교사에게 후원자 **이름·금액만** 공개 (익명·연락처 비공개 · 소식=앱 메시지)  
+4. 영수증·**국세청 파일**(M5 핵심) · 관리자 8영역 · 세계지도  
+5. **착수 2026-09-11 → 오픈 2027-02-12** (~22주)  
+6. 1차 **직접 송금·AI 번역·AI 캐릭터화 제외** (부가/추후)
 
-**확정 (2026-07-21):** T-10 Toss · T-18 Supabase  
-**진행 (2026-07-24):** D0 ✅ · D1 핵심 ✅ — [개발 로그](./logs/2026-07-24_DEV_LOG.md)
-**착수 전 확인:** Q-07, T-24~T-25, Q-15, Q-55 · Stripe는 T-19(미정)  
-**사전 준비:** [11_DEV_PREPARATION.md](./11_DEV_PREPARATION.md) (계정·키·인프라·법무 체크리스트)
+**확정:** Toss · Supabase · Kakao+Google · 도메인 ywamkoreafund.org  
+**선행:** D0 ✅ · D1 핵심 ✅  
+**일정 SSOT:** [13](./13_CUSTOMER_SCHEDULE_MILESTONE_v7.md) · [05](./05_PHASE_ROADMAP.md)  
+**★ 미결:** 선교사 기준 영수증 종류 · “프로젝트” 캠페인 정의 · 법무 Q-07/T-24  
 
 ---
 
 ## 작성 원칙
 
-- UI 카피 소스: `ko.json` → `en.json` 번역 (TheSentAsset i18n 정책과 동일)
-- 코드·주석·개발 문서: **한국어** 우선
-- 결제·기부금 영수증·개인정보는 **법적/세무 요건을 고객 확인 후** 구현
-- 2026-07-15 문서 분석 반영: 컴플라이언스 질문, 웹훅/환불 스키마, 탈퇴·a11y, Phase 1E/1F
+- UI 카피: `ko.json` → `en.json`  
+- 코드·개발 문서: **한국어** 우선  
+- 결제·영수증·개인정보: 법적/세무 요건을 고객·회계 확인 후 구현  
+- 고객 계약 일정과 내부 D-단계는 [13](./13_CUSTOMER_SCHEDULE_MILESTONE_v7.md)에서 동기화

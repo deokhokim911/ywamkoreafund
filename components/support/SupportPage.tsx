@@ -301,7 +301,7 @@ export function SupportPage() {
               {
                 icon: Mail,
                 title: '이메일',
-                value: 'support@ywamfund.kr',
+                value: 'support@ywamkoreafund.org',
                 sub: '24시간 접수 가능',
               },
               {
@@ -523,7 +523,7 @@ export function SupportPage() {
       {/* Footer */}
       <footer className="border-t border-border mt-12 py-8">
         <div className="max-w-4xl mx-auto px-4 text-center text-xs text-muted-foreground space-y-1">
-          <p className="font-semibold text-foreground">예수전도단 (YWAM Korea)</p>
+          <p className="font-semibold text-foreground">YWAMKOREAFUND · 예수전도단</p>
           <p>서울특별시 강서구 · 등록번호 123-45-67890 · 대표자: 홍길동</p>
           <p>기부금 영수증 발급 가능 단체 · 개인정보처리방침 · 이용약관</p>
         </div>

@@ -9,6 +9,7 @@ import { DonorFeed } from './DonorFeed'
 import { StickyDonateBar } from './StickyDonateBar'
 import { DonationModal } from '../donation/DonationModal'
 import { Navbar } from '../layout/Navbar'
+import { sharePage } from '@/lib/share'
 
 const MISSION_DATA = {
   title: '동남아시아 어린이 문해교육 및 복음화 사역',
@@ -74,24 +75,18 @@ export function MissionPage() {
       <div className="min-h-screen bg-background">
         <Navbar />
 
-        {/* Hero */}
-        <MissionHero
-          coverImage={MISSION_DATA.coverImage}
-          title={MISSION_DATA.title}
-          subtitle={MISSION_DATA.subtitle}
-          organization={MISSION_DATA.organization}
-          onShareClick={() => {
-            if (navigator.share) {
-              navigator.share({ title: MISSION_DATA.title, url: window.location.href })
-            }
-          }}
-        />
-
-        {/* Main content */}
-        <main className="max-w-6xl mx-auto px-4 py-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left / main column */}
-            <div className="lg:col-span-2 space-y-6 order-2 lg:order-1">
+        <main className="max-w-6xl mx-auto px-4 py-4 md:py-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            <div className="lg:col-span-2 space-y-6">
+              <MissionHero
+                coverImage={MISSION_DATA.coverImage}
+                title={MISSION_DATA.title}
+                subtitle={MISSION_DATA.subtitle}
+                organization={MISSION_DATA.organization}
+                onShareClick={() => {
+                  void sharePage({ title: MISSION_DATA.title, url: window.location.href })
+                }}
+              />
               <MissionaryProfile {...MISSIONARY_DATA} />
               <MissionBody
                 description={MISSION_DESCRIPTION}
@@ -99,8 +94,7 @@ export function MissionPage() {
               />
             </div>
 
-            {/* Right / sidebar */}
-            <div className="space-y-5 order-1 lg:order-2">
+            <div className="space-y-5 lg:sticky lg:top-20">
               <FundingProgress
                 currentAmount={MISSION_DATA.currentAmount}
                 goalAmount={MISSION_DATA.goalAmount}
@@ -116,7 +110,7 @@ export function MissionPage() {
         {/* Footer */}
         <footer className="border-t border-border mt-12 py-8">
           <div className="max-w-6xl mx-auto px-4 text-center text-xs text-muted-foreground space-y-1">
-            <p className="font-semibold text-foreground">예수전도단 (YWAM Korea)</p>
+            <p className="font-semibold text-foreground">YWAMKOREAFUND · 예수전도단</p>
             <p>서울특별시 강서구 등록번호 123-45-67890 · 대표자: 홍길동</p>
             <p>기부금 영수증 발급 가능 단체 · 개인정보처리방침 · 이용약관</p>
           </div>

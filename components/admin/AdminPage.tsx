@@ -47,6 +47,7 @@ import { WorldMapTab } from './WorldMapTab'
 import { MembersTab } from './MembersTab'
 import { CampaignApprovalTab } from './CampaignApprovalTab'
 import { cn } from '@/lib/utils'
+import { RowActionMenu } from '@/components/ui/RowActionMenu'
 import { bannerStore, type BannerSlide } from '@/lib/bannerStore'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -544,23 +545,46 @@ export function AdminPage() {
                           <td className="px-4 py-4 text-right text-muted-foreground">{m.daysLeft}일</td>
                           <td className="px-4 py-4 text-center"><StatusBadge status={m.status} /></td>
                           <td className="px-4 py-4">
-                            <div className="relative flex justify-end">
-                              <button onClick={() => setOpenMenuId(openMenuId === m.id ? null : m.id)} className="p-1.5 rounded-lg hover:bg-muted transition-colors" aria-label="더보기">
-                                <MoreHorizontal size={16} className="text-muted-foreground" />
-                              </button>
-                              {openMenuId === m.id && (
-                                <div className="absolute right-0 top-8 z-10 bg-card border border-border rounded-xl shadow-lg py-1.5 w-32">
-                                  <Link href="/mission" className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-muted transition-colors" onClick={() => setOpenMenuId(null)}>
-                                    <Eye size={14} /> 보기
-                                  </Link>
-                                  <button className="flex items-center gap-2 w-full px-3 py-2 text-sm text-foreground hover:bg-muted transition-colors">
-                                    <Pencil size={14} /> 수정
+                            <div className="flex justify-end">
+                              <RowActionMenu
+                                open={openMenuId === m.id}
+                                onClose={() => setOpenMenuId(null)}
+                                widthClassName="w-32"
+                                trigger={
+                                  <button
+                                    type="button"
+                                    onClick={() => setOpenMenuId(openMenuId === m.id ? null : m.id)}
+                                    className="p-1.5 rounded-lg hover:bg-muted transition-colors"
+                                    aria-label="더보기"
+                                    aria-expanded={openMenuId === m.id}
+                                  >
+                                    <MoreHorizontal size={16} className="text-muted-foreground" />
                                   </button>
-                                  <button className="flex items-center gap-2 w-full px-3 py-2 text-sm text-destructive hover:bg-muted transition-colors">
-                                    <Trash2 size={14} /> 삭제
-                                  </button>
-                                </div>
-                              )}
+                                }
+                              >
+                                <Link
+                                  href="/mission"
+                                  className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-muted transition-colors"
+                                  onClick={() => setOpenMenuId(null)}
+                                  role="menuitem"
+                                >
+                                  <Eye size={14} /> 보기
+                                </Link>
+                                <button
+                                  type="button"
+                                  role="menuitem"
+                                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-foreground hover:bg-muted transition-colors"
+                                >
+                                  <Pencil size={14} /> 수정
+                                </button>
+                                <button
+                                  type="button"
+                                  role="menuitem"
+                                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-destructive hover:bg-muted transition-colors"
+                                >
+                                  <Trash2 size={14} /> 삭제
+                                </button>
+                              </RowActionMenu>
                             </div>
                           </td>
                         </tr>
@@ -648,7 +672,7 @@ export function AdminPage() {
                     />
                   )}
                   <div className="absolute inset-0 flex flex-col justify-end p-6">
-                    <p className="text-xs font-semibold uppercase tracking-widest text-[oklch(0.85_0.06_195)] mb-2">예수전도단 선교 후원 플랫폼</p>
+                    <p className="text-xs font-semibold uppercase tracking-widest text-[oklch(0.85_0.06_195)] mb-2">YWAMKOREAFUND</p>
                     <h3 className="text-2xl font-bold text-white text-balance mb-1.5">
                       {activeBanners[previewIndex].title}
                     </h3>
@@ -991,7 +1015,7 @@ export function AdminPage() {
       {/* Footer */}
       <footer className="border-t border-border mt-4 py-8">
         <div className="max-w-6xl mx-auto px-4 text-center text-xs text-muted-foreground space-y-1">
-          <p className="font-semibold text-foreground">예수전도단 (YWAM Korea) — 관리자 전용</p>
+          <p className="font-semibold text-foreground">YWAMKOREAFUND — 관리자 전용</p>
           <p>무단 접근을 금지합니다 · 개인정보처리방침 · 이용약관</p>
         </div>
       </footer>

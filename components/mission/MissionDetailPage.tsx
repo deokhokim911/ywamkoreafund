@@ -14,6 +14,7 @@ import { MissionaryProfile } from '@/components/mission/MissionaryProfile'
 import { StickyDonateBar } from '@/components/mission/StickyDonateBar'
 import { SEED_DONORS } from '@/lib/mock/missions'
 import { missionStore } from '@/lib/missionStore'
+import { sharePage } from '@/lib/share'
 import { useTranslations } from 'next-intl'
 
 type MissionDetailPageProps = {
@@ -36,21 +37,18 @@ export const MissionDetailPage = ({ slug }: MissionDetailPageProps) => {
       <div className="min-h-screen bg-background">
         <Navbar />
 
-        <MissionHero
-          coverImage={mission.coverImage}
-          title={mission.title}
-          subtitle={mission.subtitle}
-          organization={mission.organization}
-          onShareClick={() => {
-            if (navigator.share) {
-              void navigator.share({ title: mission.title, url: window.location.href })
-            }
-          }}
-        />
-
-        <main className="max-w-6xl mx-auto px-4 py-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-6 order-2 lg:order-1">
+        <main className="max-w-6xl mx-auto px-4 py-4 md:py-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            <div className="lg:col-span-2 space-y-6">
+              <MissionHero
+                coverImage={mission.coverImage}
+                title={mission.title}
+                subtitle={mission.subtitle}
+                organization={mission.organization}
+                onShareClick={() => {
+                  void sharePage({ title: mission.title, url: window.location.href })
+                }}
+              />
               <MissionaryProfile
                 name={mission.missionaryName}
                 photo={mission.missionaryPhoto}
@@ -71,7 +69,7 @@ export const MissionDetailPage = ({ slug }: MissionDetailPageProps) => {
               </section>
             </div>
 
-            <div className="space-y-5 order-1 lg:order-2">
+            <div className="space-y-5 lg:sticky lg:top-20">
               <FundingProgress
                 currentAmount={mission.currentAmount}
                 goalAmount={mission.goalAmount}
@@ -86,7 +84,7 @@ export const MissionDetailPage = ({ slug }: MissionDetailPageProps) => {
 
         <footer className="border-t border-border mt-12 py-8">
           <div className="max-w-6xl mx-auto px-4 text-center text-xs text-muted-foreground space-y-1">
-            <p className="font-semibold text-foreground">예수전도단 (YWAM Korea)</p>
+            <p className="font-semibold text-foreground">YWAMKOREAFUND · 예수전도단</p>
             <p>기부금 영수증 발급 가능 단체 · 개인정보처리방침 · 이용약관</p>
           </div>
         </footer>

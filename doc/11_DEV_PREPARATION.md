@@ -4,7 +4,7 @@
 > **확정 스택:** Toss(Phase 1) · Supabase(호스팅 DB) · Kakao OAuth · next-intl(ko/en) — [01](./01_TECH_STACK.md) · [10](./10_I18N_DB_PAYMENTS.md)  
 > **개발 단계:** [09](./09_DEVELOPMENT_PHASES.md)  
 > **고객 확인:** [07](./07_CUSTOMER_QUESTIONS.md)  
-> **작성일:** 2026-07-21 · **개정:** 2026-07-23 (D0부터 Supabase 기본 — [09](./09_DEVELOPMENT_PHASES.md))
+> **작성일:** 2026-07-21 · **개정:** 2026-08-09 (고객 일정 v7 · M1=2026-09-11 — [13](./13_CUSTOMER_SCHEDULE_MILESTONE_v7.md))
 
 ---
 
@@ -28,8 +28,8 @@
 | 시기 | 준비하면 좋은 것 | 막히면 영향 |
 |------|------------------|-------------|
 | **지금 (D0 전) ★** | 로컬 도구(Node/pnpm) · GitHub · **Supabase 프로젝트 + `DATABASE_URL`** · 도메인/가칭 · `.env.example` · (선택) Docker | **D0 migrate·연결 불가** |
-| **D0~D1 병행** | Kakao **개발** 앱 · Resend · Sentry · Upstash · 브랜드 에셋 | 로그인·메일·관측 연동 지연 |
-| **D2 직전 ★** | Toss **테스트** 키·웹훅 URL · Kakao 콜백 URL 확정 · 사업자/정산 정보(고객) | **결제·Auth 불가** |
+| **D0~D1 병행 / ~M1** | Kakao·**Google** 개발 앱 · Resend · Sentry · Upstash · 브랜드 · **선교사 명단·국세청 양식** | 로그인·메일·검수 지연 |
+| **D2 / M2 직전 ★** | Toss **테스트** 키·웹훅 · Kakao·Google 콜백 · 사업자/정산 (고객) | **결제·Auth 불가** |
 | **D3 전** | 영수증 문구·단체 정보 · 약관 초안 · 발신 도메인(DNS) | PDF·메일 프로덕션 품질 |
 | **라이브(D4) 전** | Toss **라이브** 심사 · 법무(Q-07 등) · 프로덕션 Supabase · 도메인 TLS · 백업 확인 | 오픈 불가 |
 

@@ -4,7 +4,7 @@
 > **전제:** DB·Auth·실결제 미연동 — 화면·플로우는 존재  
 > **플랫폼 결정:** [10](./10_I18N_DB_PAYMENTS.md) — **결제 Phase1=Toss · DB 호스팅=Supabase** (대안 비교는 10에 보존)  
 > **관련:** [08](./08_UI_PROTOTYPE_PLAN.md) · [05](./05_PHASE_ROADMAP.md) · [04](./04_FEATURE_SPEC.md) · [03](./03_DATA_MODEL.md) · [01](./01_TECH_STACK.md)  
-> **작성일:** 2026-07-21 · **개정:** 2026-07-24 (D0 완료 · D1 핵심 완료 점검)  
+> **작성일:** 2026-07-21 · **개정:** 2026-08-09 (고객 일정 v7 매핑 — [13](./13_CUSTOMER_SCHEDULE_MILESTONE_v7.md))  
 > **독자:** 구현 담당 (프론트·풀스택)
 
 ---
@@ -49,7 +49,8 @@
 | next-intl · `[locale]` · ko/en 메시지 | **D0 → D1 → D3/D4** |
 | **Supabase Postgres + Drizzle** (연결·migrate) | **D0부터** — 도메인 스키마는 D2에서 확장 |
 | Docker Postgres | **D0 선택** (오프라인용) |
-| Better Auth · Kakao | **D2-A** |
+| Better Auth · Kakao · **Google** | **D2-A** (v7) |
+
 | **Toss** 실결제 · 웹훅 · 빌링 | **D2-C** |
 | PaymentProvider + Stripe 자리 (미도입) | **D2-C 인터페이스 · D5 후보** |
 | `/m/[slug]` · QR · 미션 Q&A · 영수증 PDF | D1 / D3 |
@@ -74,7 +75,7 @@
 | F03 | QR · 공유 | 🔶 | react-qr-code | D1 |
 | F04 | 배너 CMS | 🔶 | DB CRUD | D3 |
 | F05~F06 | 생성·승인 | ✅ | mock store → DB | D1→D2 |
-| F08~F09 | Kakao · 온보딩 | ❌ | Better Auth · roles | D2 |
+| F08~F09 | Kakao·Google · 온보딩 | ❌ | Better Auth · roles · 명단 대조 | D2 |
 | F10~F12 | 일시/정기/실패정책 | ✅모달 | **Toss** + webhook + cron | D2-C |
 | F10b | 국제 결제 | ❌ | **Stripe** Provider (후보) | **D5** |
 | F13~F16 | 대시보드 | ✅ | 실데이터 | D2-D |
@@ -106,7 +107,7 @@ flowchart LR
   end
 
   subgraph D2["D2"]
-    Auth[Better Auth Kakao]
+    Auth[Better Auth Kakao Google]
     Schema[Domain schema on Supabase]
     Toss[TossProvider]
     PayIface[PaymentProvider iface]
@@ -226,7 +227,8 @@ docker-compose.yml   # (선택) 오프라인용 Postgres 16
 
 ### D2 — Auth · DB 영속화 · Toss 결제 코어 (4~6주) ⭐
 
-**목표:** **D0에서 연결해 둔 Supabase**에 도메인 스키마·Kakao·**Toss 테스트 결제**를 올린다.  
+**목표:** **D0에서 연결해 둔 Supabase**에 도메인 스키마·**Kakao+Google**·**Toss 테스트 결제**를 올린다.  
+승인 **2단계**(본부·선교본부)·한도 3·아동보호 동의 반영 ([13](./13_CUSTOMER_SCHEDULE_MILESTONE_v7.md) M2~M4).  
 Docker는 선택. Stripe는 stub (D5 후보).
 
 #### D2-0 게이트 (확정 반영 · 착수 체크)
@@ -244,7 +246,7 @@ Docker는 선택. Stripe는 stub (D5 후보).
 |----|------|
 | D2-A1 | Drizzle 스키마: Better Auth tables + `user_roles` — **Supabase에 migrate** (D0 파이프라인 재사용) |
 | D2-A2 | (선택) 동일 migrate를 Docker 로컬 URL에도 적용해 오프라인 검증 | |
-| D2-A3 | Kakao OAuth · 세션 · `requireAuth` / `requireRole` |
+| D2-A3 | Kakao + **Google** OAuth · 세션 · `requireAuth` / `requireRole` · 선교사 명단 대조 |
 | D2-A4 | 앱 트리를 `src/app/[locale]/...`로 정렬 (D0/D1 미완 시 완료) |
 | D2-A5 | 스토리지: Supabase Storage **또는** S3-compatible (추상화) — D0에서 버킷 만들었으면 연결 |
 | D2-A6 | Supabase 규칙 재확인: Data API/`anon` 남용 금지, **DB URL·service_role은 서버만**, Auth/Realtime 미사용 |
@@ -287,7 +289,7 @@ Docker는 선택. Stripe는 stub (D5 후보).
 
 **DoD**
 
-- [ ] **Supabase**에서 migrate → Kakao 로그인 → 미션 승인 → Toss 테스트 일시/정기 E2E  
+- [ ] **Supabase**에서 migrate → Kakao/Google 로그인 → **2단계** 미션 승인 → Toss 테스트 일시/정기 E2E  
 - [ ] (선택) Docker 로컬에서도 동일 마이그레이션 재현  
 - [ ] `PaymentProvider`로 **Toss만** 활성 (`PAYMENT_PROVIDERS_ENABLED=toss`), Stripe stub flag off  
 - [ ] `/my`·`/dashboard` 수치 = DB  
@@ -501,7 +503,7 @@ flowchart TB
 | T-19 Stripe 도입 확정 시 | [10](./10_I18N_DB_PAYMENTS.md) §0·§3.5 + 본 문서 D5 |
 | i18n 로케일 추가 | `messages/*`, routing |
 | D2 스키마 | [03](./03_DATA_MODEL.md) SSOT |
-| 일정 | [05](./05_PHASE_ROADMAP.md)와 공수 동기화 |
+| 일정 | [05](./05_PHASE_ROADMAP.md) · 고객 v7 [13](./13_CUSTOMER_SCHEDULE_MILESTONE_v7.md) |
 
 ---
 
@@ -513,16 +515,18 @@ flowchart TB
 | i18n | 메시지/MD locale | DB + UI 크롬 i18n |
 | 단계 | D1 라벨 · D3 콘텐츠 | D3 |
 
-## 부록 B. `05` Phase 대응
+## 부록 B. `05` Phase · 고객 마일스톤(v7) 대응
 
-| 09 | 05 | 비고 |
-|----|-----|------|
-| D0 | Phase 0 | **+ i18n · Supabase 연결·migrate** |
-| D1 | 0~1A 사이 | UI·i18n 정렬 |
-| D2 | 0+1A+1B | **Toss · 도메인 스키마 on Supabase** |
-| D3 | 1C+1D | |
-| D4 | 1E+1F | en QA |
-| D5 | Phase 2 | **Stripe 후보·글로벌** |
+| 09 | 05 | 고객 M (v7) | 비고 |
+|----|-----|-------------|------|
+| D0 | Phase 0 (선행) | ~M1 준비 | ✅ 완료 · i18n·Supabase |
+| D1 | 0~1A mock | ~M1 | ✅ 핵심 · create→`/m/[slug]` |
+| D2 | 0+1A+1B | **M2~M4** | Kakao+**Google** · 2단계 승인 · Toss |
+| D3 | 1C+1D | **M5~M6** | 영수증·홈택스 · 관리자 8영역 |
+| D4 | 1E (+1F) | **M7~M8** | 통합·라이브·오픈 2027-02-12 |
+| D5 | Phase 2 | 오픈 이후 | Stripe·AI 부가 등 |
+
+상세: [13](./13_CUSTOMER_SCHEDULE_MILESTONE_v7.md) · 일정: [05](./05_PHASE_ROADMAP.md)
 
 ## 부록 C. 개발 원라이너 (목표 — Supabase 기본)
 
