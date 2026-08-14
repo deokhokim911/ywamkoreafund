@@ -2,9 +2,10 @@
 
 import Image from 'next/image'
 import { Clock, MapPin, Users } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 import { Link } from '@/i18n/navigation'
+import { formatMoney } from '@/lib/formatMoney'
 import type { Mission } from '@/lib/mock/missions'
 
 export type MissionCardData = Pick<
@@ -25,14 +26,11 @@ export type MissionCardData = Pick<
   | 'isFeatured'
 >
 
-const formatKRW = (amount: number): string => {
-  if (amount >= 100_000_000) return `${(amount / 100_000_000).toFixed(1)}억원`
-  if (amount >= 10_000) return `${Math.floor(amount / 10_000).toLocaleString()}만원`
-  return `${amount.toLocaleString()}원`
-}
-
 export function MissionCard({ mission }: { mission: MissionCardData }) {
   const t = useTranslations('home')
+  const tCommon = useTranslations('common')
+  const locale = useLocale()
+  const formatKRW = (amount: number) => formatMoney(amount, locale, tCommon)
   const percentage = Math.min(
     Math.round((mission.currentAmount / mission.goalAmount) * 100),
     100,

@@ -44,7 +44,7 @@ export const DEFAULT_BANNERS: BannerSlide[] = [
     id: 'b3',
     title: '몽골 초원의 복음',
     subtitle: '유목민 공동체와 함께 살아가며 교회를 개척하는 최성민 선교사를 응원해 주세요.',
-    ctaLabel: '캠페인 보기',
+    ctaLabel: '프로젝트 보기',
     ctaHref: '/m/thailand-literacy',
     videoUrl: '',
     imageUrl: '/mission-cover-4.png',

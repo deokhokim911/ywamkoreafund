@@ -169,7 +169,7 @@ docker-compose.yml   # (선택) 오프라인용 Postgres 16
 | D0-4 | `components/ui` 최소셋 | ✅ | dialog, input, label, textarea, select, badge |
 | **D0-5** | **next-intl 스캐폴딩** | ✅ | `messages/*` · `i18n/*` · `app/[locale]` · `proxy.ts` |
 | **D0-6** | **Locale switcher** | ✅ | Navbar 국기 토글 (ko↔en) |
-| **D0-7** | **Supabase 프로젝트** | ✅ | `YWAMFund` (`itwyvtcxaobfskgjhdqa`, ap-south-1) |
+| **D0-7** | **Supabase 프로젝트** | ✅ | 현재 `ngivzedhogwaqxngramm` (ap-northeast-2) · 이력 `itwyvtcxaobfskgjhdqa` |
 | **D0-8** | **`DATABASE_URL`** | ✅ | `.env.local` · Session/Transaction pooler (IPv4) |
 | **D0-9** | **drizzle-kit + `lib/db`** | ✅ | `drizzle.config.ts` · `lib/db` |
 | **D0-10** | **migrate 스모크** | ✅ | `_ywam_health` · `pnpm db:migrate` / `db:health` |
@@ -192,7 +192,7 @@ docker-compose.yml   # (선택) 오프라인용 Postgres 16
 
 ---
 
-### D1 — i18n 핵심 화면 · mock 도메인 · 라우트 (1.5~2.5주) ✅ **핵심 완료 (2026-07-24 점검)**
+### D1 — i18n 핵심 화면 · mock 도메인 · 라우트 (1.5~2.5주) ✅ **완료 (2026-08-11 점검)**
 
 **목표:** 데모 가능한 제품 루프 + **UI 문자열의 상당 부분을 메시지 파일로**.  
 도메인 CRUD는 아직 mock store (Supabase는 health/migrate 검증용).
@@ -202,26 +202,26 @@ docker-compose.yml   # (선택) 오프라인용 Postgres 16
 | D1-1 | `lib/mock/` 통합 | ✅ | `lib/mock/missions.ts` · banners는 `bannerStore` |
 | D1-2 | `missionStore` / `bannerStore` | ✅ | create→approve→home subscribe |
 | D1-3 | `/[locale]/m/[slug]` | ✅ | 카드·배너·`/mission` 리다이렉트 연결 |
-| D1-4 | QR | ✅ | `react-qr-code` on mission detail |
+| D1-4 | QR | ✅ | `react-qr-code` · locale prefix(`as-needed`) 반영 |
 | D1-5 | Create → pending_review | ✅ | `missionStore.createPending` |
 | D1-6 | Admin 승인 → published | ✅ | 승인 탭 store 연동 · `m-*` 1단계 공개 |
 | D1-7 | 로그인 스텁 | ✅ | Navbar 데모 역할 (`AuthStubProvider`) |
 | D1-8 | 모바일 nav | ✅ | 햄버거 메뉴 |
-| **D1-9** | **i18n 키 이관 (P0)** | 🟡 부분 | nav/home/mission/donate 키(50) · **DonationModal·홈 검색 문구 잔여 KO** |
-| **D1-10** | **신규 문자열 하드코딩 금지** | 🟡 부분 | 신규 경로·Navbar/Home 카드는 키 사용 · 레거시 화면 점진 이관 |
+| **D1-9** | **i18n 키 이관 (P0)** | ✅ | DonationModal·홈 배너/푸터/마퀴·미션 크롬 · `common.currency` |
+| **D1-10** | **신규 문자열 하드코딩 금지** | 🟡 부분 | 핵심 공개 경로 완료 · **create/admin/my/dashboard 레거시는 D2 병행** |
 | D1-11 | `/support` 라벨 | ✅ | nav `고객지원` / `Support` |
 
-**금액·날짜:** mock KRW 표시. `useFormatter` 확대는 잔여(비블로커).
+**금액·날짜:** `lib/formatMoney` (KO 만/억 · EN 전액). `useFormatter` 확대는 잔여(비블로커).
 
 **DoD**
 
 - [x] create→approve→`/m/{slug}` 데모 (세션 내 store)
-- [x] `messages:check-keys` CI 통과 (ko/en 50 keys)
-- [x] ko/en 홈·nav·미션(QR) 주요 UI 메시지 키
-- [ ] DonationModal 전 UI 키 이관 — **잔여 → D1 후속 또는 D2 병행**
+- [x] `messages:check-keys` CI 통과 (ko/en 키 패리티)
+- [x] ko/en 홈·nav·미션·후원 모달 주요 UI 메시지 키
+- [x] DonationModal 전 UI 키 이관
 
-**상태:** ✅ **D1 핵심 루프·라우트·스토어 완료**. 문자열 잔여만 후속. **D2 착수 가능.**  
-**로그:** [logs/2026-07-24_DEV_LOG.md](./logs/2026-07-24_DEV_LOG.md)
+**상태:** ✅ **D1 완료** (레거시 대시보드/생성 마법사 문자열은 D2와 병행). **D2 착수 가능.**  
+**로그:** [logs/2026-07-24_DEV_LOG.md](./logs/2026-07-24_DEV_LOG.md) · [logs/2026-08-11_DEV_LOG.md](./logs/2026-08-11_DEV_LOG.md)
 
 ---
 

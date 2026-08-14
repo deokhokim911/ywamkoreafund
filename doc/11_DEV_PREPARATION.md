@@ -4,7 +4,8 @@
 > **확정 스택:** Toss(Phase 1) · Supabase(호스팅 DB) · Kakao OAuth · next-intl(ko/en) — [01](./01_TECH_STACK.md) · [10](./10_I18N_DB_PAYMENTS.md)  
 > **개발 단계:** [09](./09_DEVELOPMENT_PHASES.md)  
 > **고객 확인:** [07](./07_CUSTOMER_QUESTIONS.md)  
-> **작성일:** 2026-07-21 · **개정:** 2026-08-09 (고객 일정 v7 · M1=2026-09-11 — [13](./13_CUSTOMER_SCHEDULE_MILESTONE_v7.md))
+> **고객 제출용 요청서:** [14_CUSTOMER_INFO_REQUEST.md](./14_CUSTOMER_INFO_REQUEST.md)  
+> **작성일:** 2026-07-21 · **개정:** 2026-08-11 (고객 요청서 분리 — [14](./14_CUSTOMER_INFO_REQUEST.md))
 
 ---
 
@@ -13,7 +14,7 @@
 1. **§1 타임라인**에서 “지금 당장 / D0 전 / D2 전 / 라이브 전”을 확인한다.  
 2. **§2~§8**에서 항목별로 **어떻게 준비하는지** 따라 한다.  
 3. **§9 마스터 체크리스트**에 체크하며 진행한다.  
-4. 고객·법무 의존 항목은 [07](./07_CUSTOMER_QUESTIONS.md) 답변과 함께 둔다.
+4. 고객·법무 의존 항목은 [07](./07_CUSTOMER_QUESTIONS.md) 답변과 함께 두고, **운영측에 보낼 목록은 [14](./14_CUSTOMER_INFO_REQUEST.md)** 를 사용한다.
 
 **원칙**
 
@@ -395,6 +396,7 @@ Phase 0에서 `doc/ENV_YWAMFUND_PHASE0.md`로 확장한다.
 | [09](./09_DEVELOPMENT_PHASES.md) | D0~D5 작업 |
 | [10](./10_I18N_DB_PAYMENTS.md) | Toss·Supabase 확정 |
 | [07](./07_CUSTOMER_QUESTIONS.md) | 고객 질문 |
+| [14](./14_CUSTOMER_INFO_REQUEST.md) | **고객 준비·제공 요청서** (회신용) |
 | [06](./06_OPEN_QUESTIONS.md) | 팀 결정 (T-*) |
 | PG 연동 docx | Toss 상세 참고 |
 

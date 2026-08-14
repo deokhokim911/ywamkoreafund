@@ -15,7 +15,7 @@ import { StickyDonateBar } from '@/components/mission/StickyDonateBar'
 import { SEED_DONORS } from '@/lib/mock/missions'
 import { missionStore } from '@/lib/missionStore'
 import { sharePage } from '@/lib/share'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 type MissionDetailPageProps = {
   slug: string
@@ -23,6 +23,7 @@ type MissionDetailPageProps = {
 
 export const MissionDetailPage = ({ slug }: MissionDetailPageProps) => {
   const t = useTranslations('mission')
+  const locale = useLocale()
   const [donationOpen, setDonationOpen] = useState(false)
   const mission = useMemo(() => missionStore.getBySlug(slug), [slug])
 
@@ -30,7 +31,9 @@ export const MissionDetailPage = ({ slug }: MissionDetailPageProps) => {
     notFound()
   }
 
-  const publicUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'}/m/${mission.slug}`
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+  const localePrefix = locale === 'ko' ? '' : `/${locale}`
+  const publicUrl = `${baseUrl}${localePrefix}/m/${mission.slug}`
 
   return (
     <>
@@ -84,8 +87,8 @@ export const MissionDetailPage = ({ slug }: MissionDetailPageProps) => {
 
         <footer className="border-t border-border mt-12 py-8">
           <div className="max-w-6xl mx-auto px-4 text-center text-xs text-muted-foreground space-y-1">
-            <p className="font-semibold text-foreground">YWAMKOREAFUND · 예수전도단</p>
-            <p>기부금 영수증 발급 가능 단체 · 개인정보처리방침 · 이용약관</p>
+            <p className="font-semibold text-foreground">{t('footerOrg')}</p>
+            <p>{t('footerLegal')}</p>
           </div>
         </footer>
       </div>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { MissionHero } from './MissionHero'
 import { FundingProgress } from './FundingProgress'
 import { MissionaryProfile } from './MissionaryProfile'
@@ -68,6 +69,7 @@ const DONORS = [
 ]
 
 export function MissionPage() {
+  const t = useTranslations('mission')
   const [donationOpen, setDonationOpen] = useState(false)
 
   return (
@@ -107,12 +109,11 @@ export function MissionPage() {
           </div>
         </main>
 
-        {/* Footer */}
         <footer className="border-t border-border mt-12 py-8">
           <div className="max-w-6xl mx-auto px-4 text-center text-xs text-muted-foreground space-y-1">
-            <p className="font-semibold text-foreground">YWAMKOREAFUND · 예수전도단</p>
-            <p>서울특별시 강서구 등록번호 123-45-67890 · 대표자: 홍길동</p>
-            <p>기부금 영수증 발급 가능 단체 · 개인정보처리방침 · 이용약관</p>
+            <p className="font-semibold text-foreground">{t('footerOrg')}</p>
+            <p>{t('footerAddress')}</p>
+            <p>{t('footerLegal')}</p>
           </div>
         </footer>
       </div>

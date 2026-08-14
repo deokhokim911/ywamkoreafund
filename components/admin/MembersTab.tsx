@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import {
   Search, MoreHorizontal, ChevronLeft, ChevronRight,
   ChevronDown, ChevronUp, Mail, Phone, MapPin,
@@ -9,6 +9,8 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { RowActionMenu } from '@/components/ui/RowActionMenu'
+import { MissionaryDashboardPage } from '@/components/dashboard/MissionaryDashboardPage'
+import { DonorDashboardPage } from '@/components/donor/DonorDashboardPage'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface Missionary {
@@ -375,14 +377,14 @@ function DonorFormModal({
               />
               <span>
                 <span className="block text-sm font-medium text-foreground">뉴스레터 구독</span>
-                <span className="block text-xs text-muted-foreground mt-0.5">사역 소식·캠페인 안내 메일 수신</span>
+                <span className="block text-xs text-muted-foreground mt-0.5">사역 소식·프로젝트 안내 메일 수신</span>
               </span>
             </label>
           </div>
           <div className="col-span-2">
-            <Field label="후원 캠페인">
+            <Field label="후원 프로젝트">
               <input className={INPUT} value={form.campaigns} onChange={(e) => set('campaigns', e.target.value)} placeholder="태국 문해교육, 미얀마 의료봉사 (쉼표로 구분)" />
-              <p className="text-xs text-muted-foreground mt-1">여러 캠페인은 쉼표(,)로 구분해 입력하세요.</p>
+              <p className="text-xs text-muted-foreground mt-1">여러 프로젝트는 쉼표(,)로 구분해 입력하세요.</p>
             </Field>
           </div>
         </div>
@@ -457,6 +459,86 @@ function DSortTh({ col, label, current, dir, onSort }: {
   )
 }
 
+function MemberDashboardPreview({
+  missionary,
+  donor,
+  onClose,
+}: {
+  missionary?: Missionary
+  donor?: Donor
+  onClose: () => void
+}) {
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', handleKey)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', handleKey)
+      document.body.style.overflow = ''
+    }
+  }, [onClose])
+
+  const title = missionary
+    ? `${missionary.name} 선교사 대시보드`
+    : `${donor?.name ?? ''} 후원자 대시보드`
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col bg-background">
+      <div className="flex items-center justify-between gap-3 px-4 md:px-6 py-3 border-b border-border bg-card shadow-sm">
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-primary">관리자 미리보기</p>
+          <p className="text-sm font-bold text-foreground truncate">{title}</p>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border text-sm font-medium text-foreground hover:bg-muted transition-colors"
+          aria-label="대시보드 닫기"
+        >
+          <X size={15} />
+          닫기
+        </button>
+      </div>
+      <div className="flex-1 overflow-y-auto">
+        {missionary && (
+          <MissionaryDashboardPage
+            embedded
+            profile={{
+              name: missionary.name,
+              country: missionary.country,
+              organization: missionary.organization,
+              totalRaised: missionary.totalRaised,
+              donorCount: missionary.donorCount,
+              campaignCount: missionary.campaigns,
+              status: missionary.status,
+            }}
+          />
+        )}
+        {donor && (
+          <DonorDashboardPage
+            embedded
+            profile={{
+              name: donor.name,
+              email: donor.email,
+              phone: donor.phone,
+              birthDate: donor.birthDate,
+              newsletterOptIn: donor.newsletterOptIn,
+              joinedAt: donor.joinedAt,
+              totalAmount: donor.totalAmount,
+              donationCount: donor.donationCount,
+              regularAmount: donor.regularAmount,
+              campaigns: donor.campaigns,
+              status: donor.status,
+            }}
+          />
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ─── Main ──────────────────────────────────────────────────────────────────────
 export function MembersTab() {
   const [memberView, setMemberView] = useState<'missionary' | 'donor'>('missionary')
@@ -474,6 +556,7 @@ export function MembersTab() {
   const [mFormOpen, setMFormOpen]     = useState(false)
   const [mFormTarget, setMFormTarget] = useState<Missionary | null>(null)
   const [mConfirmTarget, setMConfirmTarget] = useState<Missionary | null>(null)
+  const [mDashTarget, setMDashTarget] = useState<Missionary | null>(null)
 
   // ── Donor state ────────────────────────────────────────────────────────────
   const [donors, setDonors] = useState<Donor[]>(INIT_DONORS)
@@ -488,6 +571,7 @@ export function MembersTab() {
   const [dFormOpen, setDFormOpen]     = useState(false)
   const [dFormTarget, setDFormTarget] = useState<Donor | null>(null)
   const [dConfirmTarget, setDConfirmTarget] = useState<Donor | null>(null)
+  const [dDashTarget, setDDashTarget] = useState<Donor | null>(null)
 
   // ── Missionary list ────────────────────────────────────────────────────────
   const filteredM = useMemo(() => {
@@ -679,7 +763,8 @@ export function MembersTab() {
                   {mPageData.map((m, i) => (
                     <tr
                       key={m.id}
-                      className={cn('border-b border-border last:border-0 hover:bg-muted/20 transition-colors', i % 2 === 1 && 'bg-muted/10')}
+                      className={cn('border-b border-border last:border-0 hover:bg-muted/20 transition-colors cursor-pointer', i % 2 === 1 && 'bg-muted/10')}
+                      onClick={() => setMDashTarget(m)}
                     >
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
@@ -701,8 +786,16 @@ export function MembersTab() {
                       <td className="px-4 py-3.5 text-right font-semibold text-primary">{formatKRW(m.totalRaised)}</td>
                       <td className="px-4 py-3.5 text-right text-foreground">{m.donorCount.toLocaleString()}명</td>
                       <td className="px-4 py-3.5 text-right text-muted-foreground text-xs">{m.joinedAt}</td>
-                      <td className="px-4 py-3.5">
+                      <td className="px-4 py-3.5" onClick={(e) => e.stopPropagation()}>
                         <div className="relative flex justify-end gap-1">
+                          <button
+                            type="button"
+                            onClick={() => setMDashTarget(m)}
+                            className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                            aria-label="대시보드 보기"
+                          >
+                            <Eye size={14} />
+                          </button>
                           <button
                             onClick={() => openEditMissionary(m)}
                             className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
@@ -725,6 +818,17 @@ export function MembersTab() {
                               </button>
                             }
                           >
+                            <button
+                              type="button"
+                              role="menuitem"
+                              onClick={() => {
+                                setMDashTarget(m)
+                                setMOpenMenu(null)
+                              }}
+                              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-foreground hover:bg-muted"
+                            >
+                              <Eye size={13} /> 대시보드 보기
+                            </button>
                             <button
                               type="button"
                               role="menuitem"
@@ -886,7 +990,8 @@ export function MembersTab() {
                   {dPageData.map((d, i) => (
                     <tr
                       key={d.id}
-                      className={cn('border-b border-border last:border-0 hover:bg-muted/20 transition-colors', i % 2 === 1 && 'bg-muted/10')}
+                      className={cn('border-b border-border last:border-0 hover:bg-muted/20 transition-colors cursor-pointer', i % 2 === 1 && 'bg-muted/10')}
+                      onClick={() => setDDashTarget(d)}
                     >
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
@@ -925,8 +1030,16 @@ export function MembersTab() {
                         {d.regularAmount ? formatKRW(d.regularAmount) : '—'}
                       </td>
                       <td className="px-4 py-3.5 text-right text-muted-foreground text-xs">{d.lastDonation}</td>
-                      <td className="px-4 py-3.5">
+                      <td className="px-4 py-3.5" onClick={(e) => e.stopPropagation()}>
                         <div className="relative flex justify-end gap-1">
+                          <button
+                            type="button"
+                            onClick={() => setDDashTarget(d)}
+                            className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                            aria-label="대시보드 보기"
+                          >
+                            <Eye size={14} />
+                          </button>
                           <button
                             onClick={() => openEditDonor(d)}
                             className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
@@ -949,6 +1062,17 @@ export function MembersTab() {
                               </button>
                             }
                           >
+                            <button
+                              type="button"
+                              role="menuitem"
+                              onClick={() => {
+                                setDDashTarget(d)
+                                setDOpenMenu(null)
+                              }}
+                              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-foreground hover:bg-muted"
+                            >
+                              <Eye size={13} /> 대시보드 보기
+                            </button>
                             <button
                               type="button"
                               role="menuitem"
@@ -1060,6 +1184,17 @@ export function MembersTab() {
           message={`${dConfirmTarget.name} 후원자를 비활성화하시겠습니까?`}
           onConfirm={() => deactivateDonor(dConfirmTarget)}
           onClose={() => setDConfirmTarget(null)}
+        />
+      )}
+
+      {(mDashTarget || dDashTarget) && (
+        <MemberDashboardPreview
+          missionary={mDashTarget ?? undefined}
+          donor={dDashTarget ?? undefined}
+          onClose={() => {
+            setMDashTarget(null)
+            setDDashTarget(null)
+          }}
         />
       )}
     </div>

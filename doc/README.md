@@ -28,8 +28,12 @@
 | [11_DEV_PREPARATION.md](./11_DEV_PREPARATION.md) | 개발 사전 준비 체크리스트 |
 | [12_GIVEHOPE_FEATURE_MIGRATION.md](./12_GIVEHOPE_FEATURE_MIGRATION.md) | GiveHope 레퍼런스 마이그레이션 |
 | [13_CUSTOMER_SCHEDULE_MILESTONE_v7.md](./13_CUSTOMER_SCHEDULE_MILESTONE_v7.md) | **고객 일정·범위 SSOT (v7)** |
+| [14_CUSTOMER_INFO_REQUEST.md](./14_CUSTOMER_INFO_REQUEST.md) | **고객 준비·제공 요청서** (운영측 회신용) |
 | [ENV_YWAMFUND_PHASE0.md](./ENV_YWAMFUND_PHASE0.md) | D0 ENV · Supabase |
 | [logs/2026-07-24_DEV_LOG.md](./logs/2026-07-24_DEV_LOG.md) | 개발 로그 2026-07-24 |
+| [logs/2026-08-09_DEV_LOG.md](./logs/2026-08-09_DEV_LOG.md) | 개발 로그 2026-08-09 |
+| [logs/2026-08-11_DEV_LOG.md](./logs/2026-08-11_DEV_LOG.md) | 개발 로그 2026-08-11 (D1 i18n 마무리) |
+| [logs/2026-08-14_DEV_LOG.md](./logs/2026-08-14_DEV_LOG.md) | 개발 로그 2026-08-14 (프로젝트 용어·승인 2단계·관리자 UX) |
 | [reference/YWAMKoreaFund_세부일정_마일스톤_v7.docx](./reference/YWAMKoreaFund_세부일정_마일스톤_v7.docx) | 고객 원본 일정서 |
 
 ---

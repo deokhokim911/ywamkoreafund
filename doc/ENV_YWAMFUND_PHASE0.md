@@ -13,14 +13,15 @@
 
 ## Supabase 연결 절차
 
-1. [Dashboard](https://supabase.com/dashboard) → **YWAMFund** (`itwyvtcxaobfskgjhdqa`)
-2. **Connect → Connection string → Session pooler** (port `5432`)
+1. [Dashboard](https://supabase.com/dashboard) → 현재 프로젝트 (**`ngivzedhogwaqxngramm`**, ap-northeast-2)
+2. **Connect → Connection string → Session pooler** (port `5432` 또는 Transaction `6543`)
 3. Username은 `postgres.[project-ref]` 형식 · `?sslmode=require` 권장
 4. `.env.local`의 `DATABASE_URL`에 붙여넣기
 5. `pnpm db:migrate` · `pnpm db:health`
 
 > **주의:** `db.[ref].supabase.co` direct 호스트는 **IPv6 only**인 경우가 많아, IPv4 환경에서 `ENOTFOUND` / migrate 실패가 납니다. **Session/Transaction pooler**를 쓰세요.  
-> 풀러 호스트의 `aws-0` / `aws-1` 접두사는 프로젝트마다 다릅니다 — Dashboard에 표시된 문자열을 그대로 복사하세요.
+> 풀러 호스트의 `aws-0` / `aws-1` 접두사는 프로젝트마다 다릅니다 — Dashboard에 표시된 문자열을 그대로 복사하세요.  
+> (이력) 초기 D0 프로젝트 `itwyvtcxaobfskgjhdqa`(ap-south-1)는 폐기·이전됨.
 
 ## Supabase 사용 규칙 (D0~)
 

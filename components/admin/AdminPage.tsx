@@ -360,10 +360,10 @@ export function AdminPage() {
   const TABS: { id: Tab; label: string; icon: React.ElementType; count?: number }[] = [
     { id: 'worldmap',  label: '세계 선교지도',  icon: Globe },
     { id: 'dashboard', label: '대시보드',      icon: LayoutDashboard },
-    { id: 'approval',  label: '캠페인 승인',   icon: Check },
+    { id: 'approval',  label: '프로젝트 승인',   icon: Check },
     { id: 'members',   label: '회원 관리',    icon: Users },
     { id: 'banner',    label: '배너 관리',    icon: ImageIcon, count: banners.length },
-    { id: 'featured',  label: '추천 캠페인',  icon: Star, count: featuredCampaigns.length },
+    { id: 'featured',  label: '추천 프로젝트',  icon: Star, count: featuredCampaigns.length },
   ]
 
   return (
@@ -856,7 +856,7 @@ export function AdminPage() {
             <div className="flex items-start gap-3 bg-accent rounded-2xl p-4 border border-border">
               <AlertCircle size={16} className="text-primary mt-0.5 flex-shrink-0" />
               <p className="text-sm text-accent-foreground leading-relaxed">
-                추천 캠페인은 홈페이지 &apos;진행 중인 사역&apos; 섹션의 <strong>추천 필터</strong>에서 우선 노출됩니다. 순서를 변경하려면 위·아래 화살표를 사용하세요.
+                추천 프로젝트는 홈페이지 &apos;진행 중인 사역&apos; 섹션의 <strong>추천 필터</strong>에서 우선 노출됩니다. 순서를 변경하려면 위·아래 화살표를 사용하세요.
               </p>
             </div>
 
@@ -865,7 +865,7 @@ export function AdminPage() {
               {/* Featured list */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h2 className="font-bold text-foreground">추천 캠페인 순서</h2>
+                  <h2 className="font-bold text-foreground">추천 프로젝트 순서</h2>
                   <span className="text-xs bg-primary text-primary-foreground font-bold px-2.5 py-1 rounded-full">
                     {featuredCampaigns.length}개 선정됨
                   </span>
@@ -874,8 +874,8 @@ export function AdminPage() {
                 {featuredCampaigns.length === 0 ? (
                   <div className="text-center py-12 border-2 border-dashed border-border rounded-2xl">
                     <Star size={32} className="mx-auto mb-2 text-muted-foreground opacity-30" />
-                    <p className="text-sm text-muted-foreground">선정된 추천 캠페인이 없습니다.</p>
-                    <p className="text-xs text-muted-foreground mt-1">오른쪽 목록에서 캠페인을 선택하세요.</p>
+                    <p className="text-sm text-muted-foreground">선정된 추천 프로젝트가 없습니다.</p>
+                    <p className="text-xs text-muted-foreground mt-1">오른쪽 목록에서 프로젝트를 선택하세요.</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -916,7 +916,7 @@ export function AdminPage() {
 
               {/* All campaigns list */}
               <div className="space-y-3">
-                <h2 className="font-bold text-foreground">전체 캠페인</h2>
+                <h2 className="font-bold text-foreground">전체 프로젝트</h2>
                 <div className="space-y-2">
                   {campaigns.map((c) => {
                     const pct = Math.round((c.currentAmount / c.goalAmount) * 100)
@@ -975,7 +975,7 @@ export function AdminPage() {
               </div>
               {featuredCampaigns.length === 0 ? (
                 <div className="text-center py-8 border border-dashed border-border rounded-2xl text-muted-foreground text-sm">
-                  추천 캠페인을 선정하면 여기서 미리볼 수 있습니다.
+                  추천 프로젝트를 선정하면 여기서 미리볼 수 있습니다.
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

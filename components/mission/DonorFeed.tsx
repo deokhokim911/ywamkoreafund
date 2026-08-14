@@ -1,7 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Heart } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
+
+import { formatMoney } from '@/lib/formatMoney'
 
 interface DonorEntry {
   id: string
@@ -14,11 +16,6 @@ interface DonorEntry {
 
 interface DonorFeedProps {
   donors: DonorEntry[]
-}
-
-function formatKRW(amount: number): string {
-  if (amount >= 10_000) return `${Math.floor(amount / 10_000).toLocaleString()}만원`
-  return `${amount.toLocaleString()}원`
 }
 
 function getInitial(name: string): string {
@@ -34,15 +31,19 @@ const avatarColors = [
 ]
 
 export function DonorFeed({ donors }: DonorFeedProps) {
+  const t = useTranslations('mission')
+  const tCommon = useTranslations('common')
+  const locale = useLocale()
+  const formatKRW = (amount: number) => formatMoney(amount, locale, tCommon)
   const [expanded, setExpanded] = useState(false)
   const visible = expanded ? donors : donors.slice(0, 5)
 
   return (
     <div className="bg-card rounded-2xl border border-border p-5 md:p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-base font-semibold text-foreground">최근 후원</h2>
+        <h2 className="text-base font-semibold text-foreground">{t('recentDonors')}</h2>
         <span className="text-xs text-muted-foreground bg-muted px-2.5 py-1 rounded-full">
-          총 {donors.length}명
+          {t('totalDonors', { count: donors.length })}
         </span>
       </div>
       <ul className="space-y-3">
@@ -59,7 +60,7 @@ export function DonorFeed({ donors }: DonorFeedProps) {
                 <span className="font-semibold text-sm text-foreground">{donor.name}</span>
                 {donor.isRecurring && (
                   <span className="text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium">
-                    정기
+                    {t('recurringBadge')}
                   </span>
                 )}
                 <span className="text-sm font-bold text-primary ml-auto flex-shrink-0">
@@ -78,20 +79,20 @@ export function DonorFeed({ donors }: DonorFeedProps) {
       </ul>
       {donors.length > 5 && (
         <button
+          type="button"
           onClick={() => setExpanded((v) => !v)}
           className="mt-4 w-full text-sm text-primary hover:text-[oklch(0.44_0.12_195)] font-medium py-2 border border-primary/30 rounded-xl hover:bg-primary/5 transition-colors"
         >
-          {expanded ? '접기' : `${donors.length - 5}명 더 보기`}
+          {expanded ? t('showLess') : t('showMore', { count: donors.length - 5 })}
         </button>
       )}
 
-      {/* Live indicator */}
       <div className="flex items-center gap-1.5 mt-4 pt-4 border-t border-border">
         <span className="relative flex h-2 w-2">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
           <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
         </span>
-        <span className="text-xs text-muted-foreground">실시간 업데이트 중</span>
+        <span className="text-xs text-muted-foreground">{t('liveUpdating')}</span>
       </div>
     </div>
   )

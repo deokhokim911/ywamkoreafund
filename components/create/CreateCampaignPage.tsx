@@ -34,20 +34,12 @@ const COUNTRIES = [
   '베트남', '라오스', '중국', '일본', '케냐', '우간다', '에티오피아', '기타',
 ]
 
-const ORGANIZATIONS = [
-  '예수전도단 (YWAM Korea)',
-  '인터콥 (Intercp)',
-  '한국선교연구원 (KRIM)',
-  '두란노해외선교회 (TIM)',
-  '기독교한국루터회',
-  '기타 (직접 입력)',
-]
+const FIXED_ORGANIZATION = 'YWAM KOREA'
 
 interface FormData {
   // Step 1
   missionaryName: string
   organization: string
-  organizationCustom: string
   country: string
   deployYear: string
   phone: string
@@ -70,8 +62,7 @@ interface FormData {
 
 const INITIAL: FormData = {
   missionaryName: '',
-  organization: '',
-  organizationCustom: '',
+  organization: FIXED_ORGANIZATION,
   country: '',
   deployYear: '',
   phone: '',
@@ -199,22 +190,13 @@ function Step1({ data, update }: { data: FormData; update: (v: Partial<FormData>
       </div>
 
       <div>
-        <FieldLabel required>파송 단체</FieldLabel>
-        <Select
-          value={data.organization}
-          onChange={(e) => update({ organization: e.target.value })}
-        >
-          <option value="">단체를 선택하세요</option>
-          {ORGANIZATIONS.map((o) => <option key={o} value={o}>{o}</option>)}
-        </Select>
-        {data.organization === '기타 (직접 입력)' && (
-          <Input
-            className="mt-2"
-            placeholder="단체명 직접 입력"
-            value={data.organizationCustom}
-            onChange={(e) => update({ organizationCustom: e.target.value })}
-          />
-        )}
+        <FieldLabel>파송 단체</FieldLabel>
+        <Input
+          value={FIXED_ORGANIZATION}
+          readOnly
+          aria-readonly="true"
+          className="bg-muted text-muted-foreground cursor-default"
+        />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -264,7 +246,7 @@ function Step2({ data, update }: { data: FormData; update: (v: Partial<FormData>
   return (
     <div className="space-y-5">
       <div>
-        <FieldLabel required>캠페인 제목</FieldLabel>
+        <FieldLabel required>프로젝트 제목</FieldLabel>
         <Input
           placeholder="예) 동남아시아 어린이 문해교육 및 복음화 사역"
           value={data.title}
@@ -362,7 +344,7 @@ function Step3({ data, update }: { data: FormData; update: (v: Partial<FormData>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
-          <FieldLabel required>캠페인 시작일</FieldLabel>
+          <FieldLabel required>프로젝트 시작일</FieldLabel>
           <div className="relative">
             <Calendar size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
             <Input
@@ -374,7 +356,7 @@ function Step3({ data, update }: { data: FormData; update: (v: Partial<FormData>
           </div>
         </div>
         <div>
-          <FieldLabel required>캠페인 종료일</FieldLabel>
+          <FieldLabel required>프로젝트 종료일</FieldLabel>
           <div className="relative">
             <Calendar size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
             <Input
@@ -488,8 +470,6 @@ function Step4({ data, update }: { data: FormData; update: (v: Partial<FormData>
 }
 
 function Step5({ data, update }: { data: FormData; update: (v: Partial<FormData>) => void }) {
-  const org = data.organization === '기타 (직접 입력)' ? data.organizationCustom : data.organization
-
   return (
     <div className="space-y-5">
       <div className="bg-accent rounded-2xl p-5 space-y-4">
@@ -498,9 +478,9 @@ function Step5({ data, update }: { data: FormData; update: (v: Partial<FormData>
           {[
             { label: '선교사', value: data.missionaryName || '—' },
             { label: '파송 국가', value: data.country || '—' },
-            { label: '파송 단체', value: org || '—' },
+            { label: '파송 단체', value: data.organization },
             { label: '파송 연도', value: data.deployYear ? `${data.deployYear}년` : '—' },
-            { label: '캠페인 제목', value: data.title || '—', wide: true },
+            { label: '프로젝트 제목', value: data.title || '—', wide: true },
             { label: '목표 모금액', value: data.goalAmount ? `${Number(data.goalAmount).toLocaleString()}원` : '—' },
             { label: '기간', value: (data.startDate && data.endDate) ? `${data.startDate} ~ ${data.endDate}` : '—' },
             { label: '후원 방식', value: data.donationType === 'both' ? '일시·정기 모두' : data.donationType === 'onetime' ? '일시 후원만' : '정기 후원만' },
@@ -536,7 +516,7 @@ function Step5({ data, update }: { data: FormData; update: (v: Partial<FormData>
             입력한 정보가 사실임을 확인하며, 플랫폼{' '}
             <span className="text-primary font-semibold underline cursor-pointer">이용약관</span> 및{' '}
             <span className="text-primary font-semibold underline cursor-pointer">개인정보처리방침</span>에
-            동의합니다. 허위 정보 등록 시 캠페인이 즉시 중단될 수 있습니다.
+            동의합니다. 허위 정보 등록 시 프로젝트가 즉시 중단될 수 있습니다.
           </p>
         </label>
       </div>
@@ -554,7 +534,7 @@ export function CreateCampaignPage() {
   const update = (partial: Partial<FormData>) => setData((prev) => ({ ...prev, ...partial }))
 
   const canProceed = () => {
-    if (step === 1) return !!(data.missionaryName && data.country && data.organization && data.phone && data.email)
+    if (step === 1) return !!(data.missionaryName && data.country && data.phone && data.email)
     if (step === 2) return !!(data.title && data.body)
     if (step === 3) return !!(data.goalAmount && data.startDate && data.endDate)
     if (step === 4) return true
@@ -563,18 +543,13 @@ export function CreateCampaignPage() {
   }
 
   const handleSubmit = () => {
-    const org =
-      data.organization === '기타 (직접 입력)'
-        ? data.organizationCustom || data.organization
-        : data.organization
-
     missionStore.createPending({
       title: data.title,
       subtitle: data.subtitle,
       body: data.body,
       country: data.country,
       missionaryName: data.missionaryName,
-      organization: org,
+      organization: FIXED_ORGANIZATION,
       goalAmount: Number(data.goalAmount) || 0,
       coverImage: data.coverImagePreview || '/mission-cover.png',
       sentYear: data.deployYear ? Number(data.deployYear) : undefined,
@@ -592,10 +567,10 @@ export function CreateCampaignPage() {
           <div className="w-16 h-16 rounded-full bg-[oklch(0.94_0.06_165)] flex items-center justify-center mb-6">
             <Check size={32} className="text-[oklch(0.42_0.12_165)]" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground mb-2">캠페인이 제출되었습니다</h1>
+          <h1 className="text-2xl font-bold text-foreground mb-2">프로젝트가 제출되었습니다</h1>
           <p className="text-muted-foreground leading-relaxed max-w-sm mb-8">
             검토 후 영업일 기준 2-3일 이내에 이메일로 결과를 안내드립니다.
-            제출된 캠페인은 관리자 승인 후 공개됩니다.
+            제출된 프로젝트는 관리자 승인 후 공개됩니다.
           </p>
           <div className="flex gap-3">
             <button
@@ -623,8 +598,8 @@ export function CreateCampaignPage() {
       {/* Page header */}
       <div className="border-b border-border bg-card">
         <div className="max-w-2xl mx-auto px-4 py-8">
-          <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-2">캠페인 만들기</p>
-          <h1 className="text-2xl font-bold text-foreground mb-1">새 사역 캠페인 등록</h1>
+          <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-2">프로젝트 만들기</p>
+          <h1 className="text-2xl font-bold text-foreground mb-1">새 사역 프로젝트 등록</h1>
           <p className="text-sm text-muted-foreground">
             단계별로 정보를 입력하면 후원 페이지가 자동 생성됩니다.
           </p>
@@ -721,7 +696,7 @@ export function CreateCampaignPage() {
               )}
             >
               <Check size={16} />
-              캠페인 제출하기
+              프로젝트 제출하기
             </button>
           )}
         </div>

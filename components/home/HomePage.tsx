@@ -126,7 +126,7 @@ export function HomePage() {
                     href={activeBanner.ctaHref || '/mission'}
                     className="inline-flex items-center justify-center bg-white text-neutral-900 font-bold px-6 py-3 rounded-xl hover:bg-white/90 transition-colors"
                   >
-                    {activeBanner.ctaLabel || '자세히 보기'}
+                    {activeBanner.ctaLabel || t('banner.ctaFallback')}
                   </Link>
                   {activeBanner.videoUrl && (
                     <a
@@ -136,7 +136,7 @@ export function HomePage() {
                       className="inline-flex items-center justify-center gap-2 border border-white/40 text-white font-semibold px-6 py-3 rounded-xl hover:bg-white/10 transition-colors"
                     >
                       <Play size={15} />
-                      영상 보기
+                      {t('banner.watchVideo')}
                     </a>
                   )}
                 </div>
@@ -147,17 +147,20 @@ export function HomePage() {
                   YWAMKOREAFUND
                 </p>
                 <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-balance mb-4 text-white">
-                  선교사와 함께<br />세상을 바꿉니다
+                  {t.rich('banner.fallbackTitle', {
+                    br: () => <br />,
+                  })}
                 </h1>
                 <p className="text-white/80 text-base md:text-lg leading-relaxed mb-8">
-                  전 세계 현장에서 복음을 전하는 선교사들을 후원하세요.<br className="hidden md:block" />
-                  월 1만원으로도 한 아이의 삶이 달라집니다.
+                  {t.rich('banner.fallbackBody', {
+                    br: () => <br className="hidden md:block" />,
+                  })}
                 </p>
                 <Link
                   href="/mission"
                   className="inline-flex items-center justify-center bg-white text-neutral-900 font-bold px-6 py-3 rounded-xl hover:bg-white/90 transition-colors"
                 >
-                  사역 자세히 보기
+                  {t('banner.fallbackCta')}
                 </Link>
               </div>
             )}
@@ -169,7 +172,7 @@ export function HomePage() {
                     <button
                       key={i}
                       onClick={() => setBannerIndex(i)}
-                      aria-label={`슬라이드 ${i + 1}`}
+                      aria-label={t('banner.slideAria', { index: i + 1 })}
                       className={`rounded-full transition-all duration-300 ${
                         i === bannerIndex
                           ? 'w-5 h-2 bg-white'
@@ -180,14 +183,14 @@ export function HomePage() {
                 </div>
                 <button
                   onClick={prevBanner}
-                  aria-label="이전 슬라이드"
+                  aria-label={t('banner.prevSlide')}
                   className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/35 flex items-center justify-center transition-colors"
                 >
                   <ChevronLeft size={16} />
                 </button>
                 <button
                   onClick={nextBanner}
-                  aria-label="다음 슬라이드"
+                  aria-label={t('banner.nextSlide')}
                   className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/35 flex items-center justify-center transition-colors"
                 >
                   <ChevronRight size={16} />
@@ -314,9 +317,9 @@ export function HomePage() {
 
       <footer className="border-t border-border mt-8 py-8">
         <div className="max-w-6xl mx-auto px-4 text-center text-xs text-muted-foreground space-y-1">
-          <p className="font-semibold text-foreground">YWAMKOREAFUND · 예수전도단</p>
-          <p>서울특별시 강서구 · 등록번호 123-45-67890 · 대표자: 홍길동</p>
-          <p>기부금 영수증 발급 가능 단체 · 개인정보처리방침 · 이용약관</p>
+          <p className="font-semibold text-foreground">{t('footer.org')}</p>
+          <p>{t('footer.address')}</p>
+          <p>{t('footer.legal')}</p>
         </div>
       </footer>
     </div>

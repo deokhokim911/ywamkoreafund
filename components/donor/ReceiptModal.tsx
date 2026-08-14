@@ -54,7 +54,7 @@ export function ReceiptModal({ donation, donor, onClose }: ReceiptModalProps) {
     { label: '후원자 성명', value: donor.name },
     { label: '연락처', value: donor.phone },
     { label: '이메일', value: donor.email },
-    { label: '후원 캠페인', value: donation.campaign },
+    { label: '후원 프로젝트', value: donation.campaign },
     { label: '선교사', value: `${donation.missionary} (${donation.country})` },
     { label: '후원 금액', value: `₩ ${donation.amount.toLocaleString()}` },
     { label: '후원 방식', value: donation.type === '정기' ? '정기 후원' : '일시 후원' },

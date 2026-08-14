@@ -1,6 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useLocale, useTranslations } from 'next-intl'
+
+import { formatMoney } from '@/lib/formatMoney'
 
 interface StickyDonateBarProps {
   missionTitle: string
@@ -9,22 +12,20 @@ interface StickyDonateBarProps {
   onDonateClick: () => void
 }
 
-function formatKRW(amount: number): string {
-  if (amount >= 10_000) return `${Math.floor(amount / 10_000).toLocaleString()}만원`
-  return `${amount.toLocaleString()}원`
-}
-
 export function StickyDonateBar({
   missionTitle,
   currentAmount,
   goalAmount,
   onDonateClick,
 }: StickyDonateBarProps) {
+  const t = useTranslations('mission')
+  const tCommon = useTranslations('common')
+  const locale = useLocale()
+  const formatKRW = (amount: number) => formatMoney(amount, locale, tCommon)
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => {
-      // Show after scrolling 300px
       setVisible(window.scrollY > 300)
     }
     window.addEventListener('scroll', handleScroll, { passive: true })
@@ -39,9 +40,8 @@ export function StickyDonateBar({
         visible ? 'translate-y-0' : 'translate-y-full'
       }`}
       role="complementary"
-      aria-label="후원 빠른 접근"
+      aria-label={t('quickDonateAria')}
     >
-      {/* Mini progress bar */}
       <div className="h-1 bg-muted">
         <div
           className="h-full bg-primary transition-all duration-500"
@@ -53,14 +53,17 @@ export function StickyDonateBar({
           <p className="text-xs text-muted-foreground truncate">{missionTitle}</p>
           <p className="text-sm font-bold text-foreground">
             {formatKRW(currentAmount)}{' '}
-            <span className="text-primary font-semibold text-xs">{percentage}% 달성</span>
+            <span className="text-primary font-semibold text-xs">
+              {t('percentReached', { percent: percentage })}
+            </span>
           </p>
         </div>
         <button
+          type="button"
           onClick={onDonateClick}
           className="flex-shrink-0 bg-primary hover:bg-[oklch(0.44_0.12_195)] text-primary-foreground font-bold text-sm px-5 py-3 rounded-xl transition-colors shadow-sm active:scale-95"
         >
-          후원하기
+          {t('donate')}
         </button>
       </div>
     </div>

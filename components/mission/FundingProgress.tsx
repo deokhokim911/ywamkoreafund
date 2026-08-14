@@ -1,6 +1,9 @@
 'use client'
 
 import { Users, Clock, TrendingUp } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
+
+import { formatMoney } from '@/lib/formatMoney'
 
 interface FundingProgressProps {
   currentAmount: number
@@ -10,16 +13,6 @@ interface FundingProgressProps {
   onDonateClick: () => void
 }
 
-function formatKRW(amount: number): string {
-  if (amount >= 100_000_000) {
-    return `${(amount / 100_000_000).toFixed(1)}억원`
-  }
-  if (amount >= 10_000) {
-    return `${Math.floor(amount / 10_000).toLocaleString()}만원`
-  }
-  return `${amount.toLocaleString()}원`
-}
-
 export function FundingProgress({
   currentAmount,
   goalAmount,
@@ -27,11 +20,14 @@ export function FundingProgress({
   daysLeft,
   onDonateClick,
 }: FundingProgressProps) {
+  const t = useTranslations('mission')
+  const tCommon = useTranslations('common')
+  const locale = useLocale()
+  const formatKRW = (amount: number) => formatMoney(amount, locale, tCommon)
   const percentage = Math.min(Math.round((currentAmount / goalAmount) * 100), 100)
 
   return (
     <div className="bg-card rounded-2xl shadow-sm border border-border p-5 md:p-6">
-      {/* Progress bar */}
       <div className="mb-4">
         <div className="flex items-end justify-between mb-2">
           <div>
@@ -39,7 +35,7 @@ export function FundingProgress({
               {formatKRW(currentAmount)}
             </span>
             <span className="text-muted-foreground text-sm ml-2">
-              목표 {formatKRW(goalAmount)}
+              {t('goal', { amount: formatKRW(goalAmount) })}
             </span>
           </div>
           <span className="text-primary font-bold text-lg">{percentage}%</span>
@@ -49,7 +45,7 @@ export function FundingProgress({
           aria-valuenow={percentage}
           aria-valuemin={0}
           aria-valuemax={100}
-          aria-label={`모금 진행률 ${percentage}%`}
+          aria-label={t('progressAria', { percent: percentage })}
           className="w-full h-3 bg-muted rounded-full overflow-hidden"
         >
           <div
@@ -59,35 +55,34 @@ export function FundingProgress({
         </div>
       </div>
 
-      {/* Stats row */}
       <div className="flex items-center gap-4 text-sm text-muted-foreground mb-5">
         <div className="flex items-center gap-1.5">
           <Users size={14} className="text-primary" />
-          <span>후원자 <strong className="text-foreground">{donorCount.toLocaleString()}명</strong></span>
+          <span>
+            {t('donorCount', { count: donorCount.toLocaleString() })}
+          </span>
         </div>
         <div className="w-px h-3.5 bg-border" />
         <div className="flex items-center gap-1.5">
           <Clock size={14} className="text-primary" />
-          <span><strong className="text-foreground">{daysLeft}일</strong> 남음</span>
+          <span>{t('daysLeft', { days: daysLeft })}</span>
         </div>
         <div className="w-px h-3.5 bg-border" />
         <div className="flex items-center gap-1.5">
           <TrendingUp size={14} className="text-primary" />
-          <span>모금중</span>
+          <span>{t('fundraising')}</span>
         </div>
       </div>
 
-      {/* CTA Button */}
       <button
+        type="button"
         onClick={onDonateClick}
         className="w-full bg-primary hover:bg-[oklch(0.44_0.12_195)] text-primary-foreground font-bold text-base py-4 rounded-xl transition-colors shadow-sm active:scale-[0.99]"
       >
-        후원하기
+        {t('donate')}
       </button>
 
-      <p className="text-center text-xs text-muted-foreground mt-3">
-        기부금 영수증 발급 가능 · 안전 결제 보장
-      </p>
+      <p className="text-center text-xs text-muted-foreground mt-3">{t('receiptNote')}</p>
     </div>
   )
 }

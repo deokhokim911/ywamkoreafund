@@ -222,7 +222,24 @@ function TypeBadge({ type }: { type: string }) {
 }
 
 // ─── Main component ───────────────────────────────────────────────
-export function MissionaryDashboardPage() {
+export type MissionaryDashboardProfile = {
+  name: string
+  country: string
+  organization: string
+  deployYear?: number
+  totalRaised: number
+  donorCount: number
+  campaignCount: number
+  status: 'active' | 'pending' | 'inactive'
+}
+
+export function MissionaryDashboardPage({
+  profile,
+  embedded = false,
+}: {
+  profile?: MissionaryDashboardProfile
+  embedded?: boolean
+} = {}) {
   const [chartView, setChartView] = useState<'amount' | 'donors'>('amount')
   const [searchQuery, setSearchQuery] = useState('')
   const [typeFilter, setTypeFilter] = useState<'전체' | '일시' | '정기'>('전체')
@@ -232,13 +249,54 @@ export function MissionaryDashboardPage() {
   const [page, setPage] = useState(1)
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
 
+  const missionary = {
+    name: profile?.name ?? MISSIONARY.name,
+    country: profile?.country ?? MISSIONARY.country,
+    organization: profile?.organization ?? MISSIONARY.organization,
+    deployYear: profile?.deployYear ?? MISSIONARY.deployYear,
+    avatarInitial: (profile?.name ?? MISSIONARY.name)[0],
+    status: profile?.status ?? ('active' as const),
+  }
+
+  const campaigns = useMemo(() => {
+    if (!profile || profile.name === MISSIONARY.name) return CAMPAIGNS
+    const n = Math.max(profile.campaignCount, profile.totalRaised > 0 ? 1 : 0)
+    if (n === 0) return [] as Campaign[]
+    const templates = Array.from({ length: n }, (_, i) => CAMPAIGNS[i % CAMPAIGNS.length])
+    const baseSum = templates.reduce((s, c) => s + c.currentAmount, 0) || 1
+    const amtScale = profile.totalRaised / baseSum
+    const donorBase = templates.reduce((s, c) => s + c.donorCount, 0) || 1
+    const donorScale = profile.donorCount / donorBase
+    return templates.map((c, i) => ({
+      ...c,
+      id: `p-${i + 1}`,
+      country: i === 0 ? profile.country : c.country,
+      currentAmount: Math.round(c.currentAmount * amtScale),
+      goalAmount: Math.max(Math.round(c.goalAmount * amtScale), Math.round(c.currentAmount * amtScale) + 1),
+      donorCount: Math.max(0, Math.round(c.donorCount * donorScale)),
+      recurringCount: Math.max(0, Math.round(c.recurringCount * donorScale)),
+      monthRaised: Math.round(c.monthRaised * amtScale),
+      newDonorsThisMonth: Math.max(0, Math.round(c.newDonorsThisMonth * donorScale)),
+      status: (profile.status === 'pending' ? 'pending' : i === 0 ? 'active' : c.status) as CampaignStatus,
+    }))
+  }, [profile])
+
+  const donors = useMemo(() => {
+    if (!profile || profile.name === MISSIONARY.name) return DONORS
+    if (campaigns.length === 0) return []
+    return DONORS.map((d, i) => ({
+      ...d,
+      campaignId: campaigns[i % campaigns.length].id,
+    }))
+  }, [profile, campaigns])
+
   const classifiedCampaigns = useMemo(() => {
-    if (campaignStatusFilter === 'all') return CAMPAIGNS
-    return CAMPAIGNS.filter((c) => c.status === campaignStatusFilter)
-  }, [campaignStatusFilter])
+    if (campaignStatusFilter === 'all') return campaigns
+    return campaigns.filter((c) => c.status === campaignStatusFilter)
+  }, [campaignStatusFilter, campaigns])
 
   const statusCounts = useMemo(() => {
-    return CAMPAIGNS.reduce(
+    return campaigns.reduce(
       (acc, c) => {
         acc.all += 1
         acc[c.status] += 1
@@ -246,17 +304,17 @@ export function MissionaryDashboardPage() {
       },
       { all: 0, active: 0, urgent: 0, ended: 0, pending: 0 } as Record<'all' | CampaignStatus, number>,
     )
-  }, [])
+  }, [campaigns])
 
   const scopeCampaigns = useMemo(() => {
     if (selectedCampaignId === 'all') return classifiedCampaigns
-    return CAMPAIGNS.filter((c) => c.id === selectedCampaignId)
-  }, [classifiedCampaigns, selectedCampaignId])
+    return campaigns.filter((c) => c.id === selectedCampaignId)
+  }, [classifiedCampaigns, selectedCampaignId, campaigns])
 
   const selectedCampaign =
     selectedCampaignId === 'all'
       ? null
-      : CAMPAIGNS.find((c) => c.id === selectedCampaignId) ?? null
+      : campaigns.find((c) => c.id === selectedCampaignId) ?? null
 
   const scopeTotals = useMemo(() => {
     const currentAmount = scopeCampaigns.reduce((s, c) => s + c.currentAmount, 0)
@@ -301,7 +359,7 @@ export function MissionaryDashboardPage() {
         selectedCampaign?.daysLeft != null
           ? `${selectedCampaign.daysLeft}일 남음`
           : selectedCampaignId === 'all'
-            ? `${scopeCampaigns.length}개 캠페인`
+            ? `${scopeCampaigns.length}개 프로젝트`
             : '종료/검토',
       change: null,
       icon: Target,
@@ -322,7 +380,7 @@ export function MissionaryDashboardPage() {
 
   const scopeCampaignIds = new Set(scopeCampaigns.map((c) => c.id))
 
-  const filtered = DONORS.filter((d) => {
+  const filtered = donors.filter((d) => {
     const matchesCampaign = scopeCampaignIds.has(d.campaignId)
     const matchesSearch = !searchQuery || d.name.includes(searchQuery) || d.email.includes(searchQuery)
     const matchesType = typeFilter === '전체' || d.type === typeFilter
@@ -349,8 +407,8 @@ export function MissionaryDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
+    <div className={embedded ? 'bg-background' : 'min-h-screen bg-background'}>
+      {!embedded && <Navbar />}
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-7">
 
@@ -358,27 +416,37 @@ export function MissionaryDashboardPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center flex-shrink-0">
-              <span className="text-lg font-bold text-primary-foreground">{MISSIONARY.avatarInitial}</span>
+              <span className="text-lg font-bold text-primary-foreground">{missionary.avatarInitial}</span>
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-xl font-bold text-foreground">{MISSIONARY.name} 선교사</h1>
-                <span className="bg-accent text-accent-foreground text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1">
-                  <Heart size={11} /> 활성 사역
+                <h1 className="text-xl font-bold text-foreground">{missionary.name} 선교사</h1>
+                <span className={cn(
+                  'text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1',
+                  missionary.status === 'active'
+                    ? 'bg-accent text-accent-foreground'
+                    : missionary.status === 'pending'
+                      ? 'bg-[oklch(0.96_0.05_80)] text-[oklch(0.45_0.14_60)]'
+                      : 'bg-muted text-muted-foreground',
+                )}>
+                  <Heart size={11} />
+                  {missionary.status === 'active' ? '활성 사역' : missionary.status === 'pending' ? '승인 대기' : '비활성'}
                 </span>
               </div>
               <p className="text-sm text-muted-foreground mt-0.5">
-                {MISSIONARY.organization} · {MISSIONARY.country} · {MISSIONARY.deployYear}년 파송 · 캠페인 {CAMPAIGNS.length}개
+                {missionary.organization} · {missionary.country} · {missionary.deployYear}년 파송 · 프로젝트 {campaigns.length}개
               </p>
             </div>
           </div>
-          <Link
-            href="/create"
-            className="flex items-center gap-2 bg-primary hover:bg-[oklch(0.44_0.12_195)] text-primary-foreground text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors self-start sm:self-auto"
-          >
-            <Plus size={15} />
-            새 캠페인 만들기
-          </Link>
+          {!embedded && (
+            <Link
+              href="/create"
+              className="flex items-center gap-2 bg-primary hover:bg-[oklch(0.44_0.12_195)] text-primary-foreground text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors self-start sm:self-auto"
+            >
+              <Plus size={15} />
+              새 프로젝트 만들기
+            </Link>
+          )}
         </div>
 
         {/* Campaign classification */}
@@ -389,9 +457,9 @@ export function MissionaryDashboardPage() {
                 <LayoutGrid size={18} className="text-primary" aria-hidden="true" />
               </div>
               <div>
-                <h2 className="font-bold text-foreground">내 캠페인</h2>
+                <h2 className="font-bold text-foreground">내 프로젝트</h2>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  상태별로 분류하고 캠페인을 선택해 현황을 확인하세요
+                  상태별로 분류하고 프로젝트를 선택해 현황을 확인하세요
                 </p>
               </div>
             </div>
@@ -412,7 +480,7 @@ export function MissionaryDashboardPage() {
           <div
             className="flex items-center gap-2 flex-wrap"
             role="tablist"
-            aria-label="캠페인 상태 분류"
+            aria-label="프로젝트 상태 분류"
           >
             {CAMPAIGN_STATUS_FILTERS.map((f) => (
               <button
@@ -500,7 +568,7 @@ export function MissionaryDashboardPage() {
             </div>
           ) : (
             <div className="rounded-xl border border-dashed border-border py-10 text-center text-sm text-muted-foreground">
-              해당 상태의 캠페인이 없습니다.
+              해당 상태의 프로젝트가 없습니다.
             </div>
           )}
         </section>
@@ -547,7 +615,7 @@ export function MissionaryDashboardPage() {
                         : ''
                     }`
                   : campaignStatusFilter === 'all'
-                    ? `전체 캠페인 ${scopeCampaigns.length}개`
+                    ? `전체 프로젝트 ${scopeCampaigns.length}개`
                     : `${CAMPAIGN_STATUS_FILTERS.find((f) => f.id === campaignStatusFilter)?.label} ${scopeCampaigns.length}개`}
               </p>
             </div>
@@ -682,7 +750,7 @@ export function MissionaryDashboardPage() {
                   { label: '이번 달 모금', value: formatKRW(scopeTotals.monthRaised) },
                   {
                     label: '후원 취소',
-                    value: `${DONORS.filter((d) => scopeCampaignIds.has(d.campaignId) && d.status === 'cancelled').length}건`,
+                    value: `${donors.filter((d) => scopeCampaignIds.has(d.campaignId) && d.status === 'cancelled').length}건`,
                   },
                   {
                     label: '평균 후원액',
@@ -952,13 +1020,14 @@ export function MissionaryDashboardPage() {
 
       </div>
 
-      {/* Footer */}
-      <footer className="border-t border-border mt-8 py-8">
-        <div className="max-w-6xl mx-auto px-4 text-center text-xs text-muted-foreground">
-          <p className="font-semibold text-foreground">YWAMKOREAFUND — 선교사 포털</p>
-          <p className="mt-1">개인정보처리방침 · 이용약관 · 문의: support@ywamkoreafund.org</p>
-        </div>
-      </footer>
+      {!embedded && (
+        <footer className="border-t border-border mt-8 py-8">
+          <div className="max-w-6xl mx-auto px-4 text-center text-xs text-muted-foreground">
+            <p className="font-semibold text-foreground">YWAMKOREAFUND — 선교사 포털</p>
+            <p className="mt-1">개인정보처리방침 · 이용약관 · 문의: support@ywamkoreafund.org</p>
+          </div>
+        </footer>
+      )}
     </div>
   )
 }

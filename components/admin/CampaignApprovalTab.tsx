@@ -29,7 +29,7 @@ import type { Mission } from '@/lib/mock/missions'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type ApprovalStage = 'submitted' | 'handler' | 'approver' | 'final' | 'approved' | 'rejected'
+type ApprovalStage = 'submitted' | 'handler' | 'approver' | 'approved' | 'rejected'
 
 interface HistoryEntry {
   id: string
@@ -56,7 +56,6 @@ interface CampaignRequest {
   stage: ApprovalStage
   handlerName: string | null
   approverName: string | null
-  finalApproverName: string | null
   history: HistoryEntry[]
 }
 
@@ -78,7 +77,6 @@ const INITIAL_REQUESTS: CampaignRequest[] = [
     stage: 'handler',
     handlerName: '정민아',
     approverName: null,
-    finalApproverName: null,
     history: [
       {
         id: 'h1',
@@ -86,7 +84,7 @@ const INITIAL_REQUESTS: CampaignRequest[] = [
         action: 'submitted',
         actor: '김태양',
         actorRole: '선교사',
-        comment: '캠페인 등록 신청합니다. 현지 NGO 협약서와 예산 계획서를 첨부했습니다.',
+        comment: '프로젝트 등록 신청합니다. 현지 NGO 협약서와 예산 계획서를 첨부했습니다.',
         timestamp: '2026-07-10 09:14',
       },
       {
@@ -133,7 +131,6 @@ const INITIAL_REQUESTS: CampaignRequest[] = [
     stage: 'approver',
     handlerName: '최재원',
     approverName: '오수진',
-    finalApproverName: null,
     history: [
       {
         id: 'h1',
@@ -141,7 +138,7 @@ const INITIAL_REQUESTS: CampaignRequest[] = [
         action: 'submitted',
         actor: '박소율',
         actorRole: '선교사',
-        comment: '3기 캠페인 신청합니다. 2기 결과보고서도 함께 첨부합니다.',
+        comment: '3기 프로젝트 신청합니다. 2기 결과보고서도 함께 첨부합니다.',
         timestamp: '2026-07-08 16:44',
       },
       {
@@ -177,7 +174,7 @@ const INITIAL_REQUESTS: CampaignRequest[] = [
         action: 'commented',
         actor: '오수진',
         actorRole: '승인자',
-        comment: '이전 캠페인 실적 우수. 홍보 문구 일부 수정 후 최종 승인 요청 예정입니다.',
+        comment: '이전 프로젝트 실적 우수. 홍보 문구 일부 수정 후 승인 예정입니다.',
         timestamp: '2026-07-10 09:55',
       },
     ],
@@ -194,10 +191,9 @@ const INITIAL_REQUESTS: CampaignRequest[] = [
     duration: 120,
     description: '민다나오 분쟁 피해 아동 150명을 위한 트라우마 회복 프로그램과 대안 교육 운영.',
     submittedAt: '2026-07-05 13:00',
-    stage: 'final',
+    stage: 'approver',
     handlerName: '정민아',
     approverName: '오수진',
-    finalApproverName: '한경수',
     history: [
       {
         id: 'h1',
@@ -235,24 +231,6 @@ const INITIAL_REQUESTS: CampaignRequest[] = [
         comment: '승인자 오수진님께 전달되었습니다.',
         timestamp: '2026-07-06 10:44',
       },
-      {
-        id: 'h5',
-        stage: 'approver',
-        action: 'approved',
-        actor: '오수진',
-        actorRole: '승인자',
-        comment: 'MOU 문서 및 리스크 평가서 모두 적합. 목표 금액 및 일정 타당성 확인됨. 최종 승인자로 이관합니다.',
-        timestamp: '2026-07-07 15:30',
-      },
-      {
-        id: 'h6',
-        stage: 'final',
-        action: 'assigned',
-        actor: '이시스템',
-        actorRole: '시스템',
-        comment: '최종 승인자 한경수님께 전달되었습니다.',
-        timestamp: '2026-07-07 15:31',
-      },
     ],
   },
   {
@@ -270,7 +248,6 @@ const INITIAL_REQUESTS: CampaignRequest[] = [
     stage: 'approved',
     handlerName: '최재원',
     approverName: '오수진',
-    finalApproverName: '한경수',
     history: [
       {
         id: 'h1',
@@ -305,26 +282,17 @@ const INITIAL_REQUESTS: CampaignRequest[] = [
         action: 'approved',
         actor: '오수진',
         actorRole: '승인자',
-        comment: '내용 및 예산 타당. 이관합니다.',
+        comment: '내용 및 예산 타당. 승인합니다.',
         timestamp: '2026-07-03 14:00',
       },
       {
         id: 'h5',
-        stage: 'final',
-        action: 'approved',
-        actor: '한경수',
-        actorRole: '최종 승인자',
-        comment: '사역 목적 및 실행 계획 모두 우수합니다. 최종 승인합니다.',
-        timestamp: '2026-07-04 10:15',
-      },
-      {
-        id: 'h6',
         stage: 'approved',
         action: 'registered',
         actor: '이시스템',
         actorRole: '시스템',
-        comment: '캠페인이 플랫폼에 등록되어 공개되었습니다.',
-        timestamp: '2026-07-04 10:16',
+        comment: '프로젝트가 플랫폼에 등록되어 공개되었습니다.',
+        timestamp: '2026-07-03 14:01',
       },
     ],
   },
@@ -343,7 +311,6 @@ const INITIAL_REQUESTS: CampaignRequest[] = [
     stage: 'submitted',
     handlerName: null,
     approverName: null,
-    finalApproverName: null,
     history: [
       {
         id: 'h1',
@@ -351,7 +318,7 @@ const INITIAL_REQUESTS: CampaignRequest[] = [
         action: 'submitted',
         actor: '강민호',
         actorRole: '선교사',
-        comment: '혹한기 쉼터 운영 긴급 캠페인 신청합니다. 파트너 단체 협약서 첨부합니다.',
+        comment: '혹한기 쉼터 운영 긴급 프로젝트 신청합니다. 파트너 단체 협약서 첨부합니다.',
         timestamp: '2026-07-13 08:30',
       },
     ],
@@ -371,7 +338,6 @@ const INITIAL_REQUESTS: CampaignRequest[] = [
     stage: 'rejected',
     handlerName: '정민아',
     approverName: null,
-    finalApproverName: null,
     history: [
       {
         id: 'h1',
@@ -379,7 +345,7 @@ const INITIAL_REQUESTS: CampaignRequest[] = [
         action: 'submitted',
         actor: '임수연',
         actorRole: '선교사',
-        comment: '캠페인 신청합니다.',
+        comment: '프로젝트 신청합니다.',
         timestamp: '2026-07-11 15:44',
       },
       {
@@ -404,13 +370,12 @@ const INITIAL_REQUESTS: CampaignRequest[] = [
   },
 ]
 
-const STAGE_SEQUENCE: ApprovalStage[] = ['submitted', 'handler', 'approver', 'final', 'approved']
+const STAGE_SEQUENCE: ApprovalStage[] = ['submitted', 'handler', 'approver', 'approved']
 
 const STAGE_META: Record<ApprovalStage, { label: string; shortLabel: string; color: string; bgColor: string; borderColor: string }> = {
   submitted:  { label: '신청 접수',    shortLabel: '접수',    color: 'text-muted-foreground', bgColor: 'bg-muted',               borderColor: 'border-border'   },
   handler:    { label: '담당자 검토',  shortLabel: '담당자',  color: 'text-amber-700',         bgColor: 'bg-amber-50',            borderColor: 'border-amber-200' },
   approver:   { label: '승인자 검토',  shortLabel: '승인자',  color: 'text-blue-700',          bgColor: 'bg-blue-50',             borderColor: 'border-blue-200'  },
-  final:      { label: '최종 승인',    shortLabel: '최종',    color: 'text-violet-700',        bgColor: 'bg-violet-50',           borderColor: 'border-violet-200'},
   approved:   { label: '등록 완료',    shortLabel: '완료',    color: 'text-primary',           bgColor: 'bg-accent',              borderColor: 'border-primary/30'},
   rejected:   { label: '반려',         shortLabel: '반려',    color: 'text-destructive',       bgColor: 'bg-destructive/10',      borderColor: 'border-destructive/30'},
 }
@@ -431,7 +396,6 @@ const FILTER_OPTIONS: { label: string; value: ApprovalStage | 'all' }[] = [
   { label: '신청 접수', value: 'submitted' },
   { label: '담당자',    value: 'handler'  },
   { label: '승인자',    value: 'approver' },
-  { label: '최종 승인', value: 'final'    },
   { label: '등록 완료', value: 'approved' },
   { label: '반려',      value: 'rejected' },
 ]
@@ -447,7 +411,6 @@ function StageBadge({ stage }: { stage: ApprovalStage }) {
       {stage === 'submitted' && <Clock size={11} />}
       {stage === 'handler'   && <AlertCircle size={11} />}
       {stage === 'approver'  && <AlertCircle size={11} />}
-      {stage === 'final'     && <AlertCircle size={11} />}
       {m.label}
     </span>
   )
@@ -458,7 +421,6 @@ function StepBar({ stage }: { stage: ApprovalStage }) {
     { key: 'submitted', label: '신청 접수' },
     { key: 'handler',   label: '담당자 검토' },
     { key: 'approver',  label: '승인자 검토' },
-    { key: 'final',     label: '최종 승인' },
     { key: 'approved',  label: '등록 완료' },
   ]
   const currentIdx = stage === 'rejected' ? -1 : STAGE_SEQUENCE.indexOf(stage)
@@ -560,7 +522,6 @@ function DetailModal({
   const currentStageLabel =
     request.stage === 'handler'  ? `담당자 (${request.handlerName ?? '미배정'})` :
     request.stage === 'approver' ? `승인자 (${request.approverName ?? '미배정'})` :
-    request.stage === 'final'    ? `최종 승인자 (${request.finalApproverName ?? '미배정'})` :
     STAGE_META[request.stage].label
 
   return (
@@ -599,7 +560,7 @@ function DetailModal({
           )}
           {request.stage === 'rejected' && (
             <p className="text-xs text-destructive mt-3 text-center font-semibold flex items-center justify-center gap-1">
-              <XCircle size={12} /> 이 캠페인은 반려 처리되었습니다.
+              <XCircle size={12} /> 이 프로젝트는 반려 처리되었습니다.
             </p>
           )}
         </div>
@@ -649,11 +610,10 @@ function DetailModal({
                 <p className="text-[10px] text-muted-foreground mb-1">사역 설명</p>
                 <p className="text-sm text-foreground leading-relaxed">{request.description}</p>
               </div>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 {[
-                  { label: '담당자',    value: request.handlerName    ?? '미배정', done: !!request.handlerName    },
-                  { label: '승인자',    value: request.approverName   ?? '미배정', done: !!request.approverName   },
-                  { label: '최종 승인자', value: request.finalApproverName ?? '미배정', done: !!request.finalApproverName },
+                  { label: '담당자', value: request.handlerName  ?? '미배정', done: !!request.handlerName  },
+                  { label: '승인자', value: request.approverName ?? '미배정', done: !!request.approverName },
                 ].map(r => (
                   <div key={r.label} className={cn('rounded-xl p-3 border', r.done ? 'border-primary/30 bg-accent' : 'border-border bg-muted/40')}>
                     <p className="text-[10px] text-muted-foreground mb-0.5">{r.label}</p>
@@ -720,8 +680,8 @@ function DetailModal({
                 onClick={() => { onAction(request.id, 'approve', comment, actor, currentStageLabel); onClose() }}
                 className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold bg-primary text-primary-foreground hover:bg-[oklch(0.44_0.12_195)] transition-colors disabled:opacity-40 ml-auto"
               >
-                {request.stage === 'final' ? (
-                  <><CheckCircle2 size={14} /> 최종 승인 및 등록</>
+                {request.stage === 'approver' ? (
+                  <><CheckCircle2 size={14} /> 승인 및 등록</>
                 ) : (
                   <><ArrowRight size={14} /> 승인 후 이관</>
                 )}
@@ -739,7 +699,7 @@ function DetailModal({
 function ApprovalKPI({ requests }: { requests: CampaignRequest[] }) {
   const counts = {
     total:    requests.length,
-    pending:  requests.filter(r => ['submitted','handler','approver','final'].includes(r.stage)).length,
+    pending:  requests.filter(r => ['submitted','handler','approver'].includes(r.stage)).length,
     approved: requests.filter(r => r.stage === 'approved').length,
     rejected: requests.filter(r => r.stage === 'rejected').length,
   }
@@ -784,7 +744,6 @@ const missionToRequest = (m: Mission): CampaignRequest => ({
   stage: 'submitted',
   handlerName: null,
   approverName: null,
-  finalApproverName: null,
   history: [
     {
       id: `h-${m.id}-1`,
@@ -792,7 +751,7 @@ const missionToRequest = (m: Mission): CampaignRequest => ({
       action: 'submitted',
       actor: m.missionaryName,
       actorRole: '선교사',
-      comment: '캠페인 등록 신청 (D1 mock store)',
+      comment: '프로젝트 등록 신청 (D1 mock store)',
       timestamp: new Date(m.createdAt).toLocaleString('ko-KR', { hour12: false }),
     },
   ],
@@ -885,7 +844,7 @@ export function CampaignApprovalTab() {
               action: 'registered' as const,
               actor: '이시스템',
               actorRole: '시스템',
-              comment: '캠페인이 플랫폼에 등록되어 공개되었습니다.',
+              comment: '프로젝트가 플랫폼에 등록되어 공개되었습니다.',
               timestamp: now,
             },
           ],
@@ -906,7 +865,7 @@ export function CampaignApprovalTab() {
           action: 'registered',
           actor: '이시스템',
           actorRole: '시스템',
-          comment: '캠페인이 플랫폼에 등록되어 공개되었습니다.',
+          comment: '프로젝트가 플랫폼에 등록되어 공개되었습니다.',
           timestamp: now,
         })
       } else {
@@ -938,7 +897,7 @@ export function CampaignApprovalTab() {
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="캠페인 제목, 선교사, 국가 검색"
+            placeholder="프로젝트 제목, 선교사, 국가 검색"
             className="w-full pl-9 pr-4 py-2.5 text-sm border border-border rounded-xl bg-card focus:outline-none focus:ring-2 focus:ring-primary/30"
           />
         </div>
@@ -997,7 +956,7 @@ export function CampaignApprovalTab() {
 
                 {/* Mini step indicator */}
                 <div className="hidden lg:flex items-center gap-1">
-                  {(['submitted','handler','approver','final','approved'] as ApprovalStage[]).map((s, i, arr) => {
+                  {(['submitted','handler','approver','approved'] as ApprovalStage[]).map((s, i, arr) => {
                     const stageIdx   = req.stage === 'rejected' ? -1 : STAGE_SEQUENCE.indexOf(req.stage)
                     const stepIdx    = STAGE_SEQUENCE.indexOf(s)
                     const isDone     = req.stage !== 'rejected' && stageIdx > stepIdx

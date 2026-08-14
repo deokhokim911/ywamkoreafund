@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { Share2, Heart } from 'lucide-react'
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 
 interface MissionHeroProps {
   coverImage: string
@@ -19,6 +20,7 @@ export function MissionHero({
   organization,
   onShareClick,
 }: MissionHeroProps) {
+  const t = useTranslations('mission')
   const [liked, setLiked] = useState(false)
 
   return (
@@ -37,23 +39,23 @@ export function MissionHero({
         <button
           type="button"
           onClick={() => setLiked((v) => !v)}
-          aria-label="찜하기"
+          aria-label={t('like')}
           className="flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur-sm px-3 py-2 text-sm font-medium text-foreground shadow-sm hover:bg-white transition-colors"
         >
           <Heart
             size={16}
             className={liked ? 'fill-rose-500 stroke-rose-500' : 'stroke-foreground'}
           />
-          <span className={liked ? 'text-rose-500' : ''}>{liked ? '찜완료' : '찜하기'}</span>
+          <span className={liked ? 'text-rose-500' : ''}>{liked ? t('liked') : t('like')}</span>
         </button>
         <button
           type="button"
           onClick={onShareClick}
-          aria-label="공유하기"
+          aria-label={t('share')}
           className="flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur-sm px-3 py-2 text-sm font-medium text-foreground shadow-sm hover:bg-white transition-colors"
         >
           <Share2 size={16} />
-          <span>공유</span>
+          <span>{t('share')}</span>
         </button>
       </div>
 

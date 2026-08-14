@@ -53,7 +53,7 @@ const KPI = [
     icon: TrendingUp,
   },
   {
-    label: '후원한 캠페인',
+    label: '후원한 프로젝트',
     value: '3개',
     sub: '진행 중 2개 포함',
     change: null,
@@ -262,14 +262,122 @@ function StatusBadge({ status }: { status: DonationStatus }) {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export function DonorDashboardPage() {
+export type DonorDashboardProfile = {
+  name: string
+  email: string
+  phone: string
+  birthDate: string
+  newsletterOptIn: boolean
+  joinedAt: string
+  totalAmount: number
+  donationCount: number
+  regularAmount: number
+  campaigns: string[]
+  status: 'active' | 'inactive' | 'paused'
+}
+
+export function DonorDashboardPage({
+  profile,
+  embedded = false,
+}: {
+  profile?: DonorDashboardProfile
+  embedded?: boolean
+} = {}) {
   const [searchQuery, setSearchQuery] = useState('')
   const [typeFilter, setTypeFilter] = useState<'전체' | '일시' | '정기'>('전체')
   const [statusFilter, setStatusFilter] = useState<'전체' | 'confirmed' | 'pending' | 'cancelled'>('전체')
   const [page, setPage] = useState(1)
   const [receiptDonation, setReceiptDonation] = useState<Donation | null>(null)
 
-  const filtered = DONATIONS.filter((d) => {
+  const donor = {
+    name: profile?.name ?? DONOR.name,
+    email: profile?.email ?? DONOR.email,
+    phone: profile?.phone ?? DONOR.phone,
+    birthDate: (profile?.birthDate ?? DONOR.birthDate).replace(/-/g, '.'),
+    newsletterOptIn: profile?.newsletterOptIn ?? DONOR.newsletterOptIn,
+    joinedAt: profile?.joinedAt ?? DONOR.joinedAt,
+    avatarInitial: (profile?.name ?? DONOR.name)[0],
+    status: profile?.status ?? ('active' as const),
+  }
+
+  const kpi = profile
+    ? [
+        {
+          label: '총 후원 금액',
+          value: `₩ ${profile.totalAmount.toLocaleString()}`,
+          sub: '누적 후원액',
+          change: null,
+          icon: TrendingUp,
+        },
+        {
+          label: '후원한 프로젝트',
+          value: `${profile.campaigns.length}개`,
+          sub: profile.campaigns.length > 0 ? '후원 중인 사역' : '후원 내역 없음',
+          change: null,
+          icon: Heart,
+        },
+        {
+          label: '정기 후원',
+          value: profile.regularAmount > 0 ? `₩ ${profile.regularAmount.toLocaleString()}` : '없음',
+          sub: '월 정기 후원액',
+          change: null,
+          icon: RefreshCw,
+        },
+        {
+          label: '기부 영수증',
+          value: `${profile.donationCount}건`,
+          sub: '전체 발급 내역',
+          change: null,
+          icon: FileText,
+        },
+      ]
+    : KPI
+
+  const donations = (() => {
+    if (!profile) return DONATIONS
+    if (profile.donationCount === 0 && profile.campaigns.length === 0) return [] as Donation[]
+    const names = profile.campaigns.length > 0 ? profile.campaigns : ['후원 프로젝트']
+    const count = Math.max(profile.donationCount, names.length)
+    return Array.from({ length: Math.min(count, 12) }, (_, i) => {
+      const base = DONATIONS[i % DONATIONS.length]
+      return {
+        ...base,
+        id: `${profile.name}-don-${i + 1}`,
+        campaign: names[i % names.length],
+        amount: profile.regularAmount > 0 && i % 2 === 0 ? profile.regularAmount : base.amount,
+        type: (profile.regularAmount > 0 && i % 2 === 0 ? '정기' : '일시') as '일시' | '정기',
+      }
+    })
+  })()
+
+  const monthlyData = profile
+    ? MONTHLY_DATA.map((row, i) => ({
+        ...row,
+        amount: Math.max(
+          0,
+          Math.round((profile.totalAmount / 6) * (0.7 + (i % 3) * 0.2)),
+        ),
+      }))
+    : MONTHLY_DATA
+
+  const activeCampaigns = profile
+    ? profile.campaigns.map((title, i) => ({
+        id: `ac-${i + 1}`,
+        title,
+        missionary: 'YWAM KOREA 선교사',
+        country: title.slice(0, 2),
+        cover: ['/mission-cover.png', '/mission-cover-2.png', '/mission-cover-3.png'][i % 3],
+        raised: 2_000_000 + i * 800_000,
+        goal: 8_000_000,
+        myTotal: Math.round(profile.totalAmount / Math.max(profile.campaigns.length, 1)),
+        type: profile.regularAmount > 0 && i === 0
+          ? `정기 ₩${profile.regularAmount.toLocaleString()}/월`
+          : '일시 후원',
+        dDay: 20 + i * 10,
+      }))
+    : ACTIVE_CAMPAIGNS
+
+  const filtered = donations.filter((d) => {
     const matchesSearch =
       !searchQuery ||
       d.campaign.includes(searchQuery) ||
@@ -283,8 +391,8 @@ export function DonorDashboardPage() {
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
+    <div className={embedded ? 'bg-background' : 'min-h-screen bg-background'}>
+      {!embedded && <Navbar />}
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-7">
 
@@ -292,42 +400,51 @@ export function DonorDashboardPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center flex-shrink-0">
-              <span className="text-lg font-bold text-primary-foreground">{DONOR.avatarInitial}</span>
+              <span className="text-lg font-bold text-primary-foreground">{donor.avatarInitial}</span>
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-xl font-bold text-foreground">{DONOR.name}님의 후원 현황</h1>
-                <span className="bg-[oklch(0.96_0.05_80)] text-[oklch(0.45_0.14_60)] text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1">
+                <h1 className="text-xl font-bold text-foreground">{donor.name}님의 후원 현황</h1>
+                <span className={cn(
+                  'text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1',
+                  donor.status === 'active'
+                    ? 'bg-[oklch(0.96_0.05_80)] text-[oklch(0.45_0.14_60)]'
+                    : donor.status === 'paused'
+                      ? 'bg-muted text-muted-foreground'
+                      : 'bg-muted text-muted-foreground',
+                )}>
                   <Star size={11} />
-                  활성 후원자
+                  {donor.status === 'active' ? '활성 후원자' : donor.status === 'paused' ? '일시정지' : '비활성'}
                 </span>
               </div>
               <p className="text-sm text-muted-foreground mt-0.5">
-                {DONOR.email} · 생년월일 {DONOR.birthDate} ·{' '}
-                {DONOR.newsletterOptIn ? '뉴스레터 구독 중' : '뉴스레터 미구독'} ·{' '}
-                {DONOR.joinedAt}부터 함께하고 있어요
+                {donor.email} · 생년월일 {donor.birthDate} ·{' '}
+                {donor.newsletterOptIn ? '뉴스레터 구독 중' : '뉴스레터 미구독'} ·{' '}
+                {donor.joinedAt}부터 함께하고 있어요
               </p>
             </div>
           </div>
-          <Link
-            href="/"
-            className="flex items-center gap-2 bg-primary hover:bg-[oklch(0.44_0.12_195)] text-primary-foreground text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors self-start sm:self-auto"
-          >
-            <Heart size={15} />
-            새 캠페인 후원하기
-          </Link>
+          {!embedded && (
+            <Link
+              href="/"
+              className="flex items-center gap-2 bg-primary hover:bg-[oklch(0.44_0.12_195)] text-primary-foreground text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors self-start sm:self-auto"
+            >
+              <Heart size={15} />
+              새 프로젝트 후원하기
+            </Link>
+          )}
         </div>
 
         {/* ── KPI cards ── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {KPI.map((kpi) => (
-            <div key={kpi.label} className="bg-card rounded-2xl border border-border p-5 shadow-sm">
+          {kpi.map((item) => (
+            <div key={item.label} className="bg-card rounded-2xl border border-border p-5 shadow-sm">
               <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center mb-3">
-                <kpi.icon size={18} className="text-primary" />
+                <item.icon size={18} className="text-primary" />
               </div>
-              <p className="text-xl font-bold text-foreground">{kpi.value}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{kpi.label}</p>
-              <p className="text-xs text-primary font-medium mt-1">{kpi.sub}</p>
+              <p className="text-xl font-bold text-foreground">{item.value}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{item.label}</p>
+              <p className="text-xs text-primary font-medium mt-1">{item.sub}</p>
             </div>
           ))}
         </div>
@@ -342,7 +459,7 @@ export function DonorDashboardPage() {
               <p className="text-xs text-muted-foreground mt-0.5">최근 6개월 후원 추이</p>
             </div>
             <ResponsiveContainer width="100%" height={210}>
-              <AreaChart data={MONTHLY_DATA} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+              <AreaChart data={monthlyData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="gradDonor" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="oklch(0.52 0.12 195)" stopOpacity={0.2} />
@@ -382,12 +499,15 @@ export function DonorDashboardPage() {
           {/* Active campaigns */}
           <div className="bg-card rounded-2xl border border-border p-5 shadow-sm flex flex-col gap-4">
             <div className="flex items-center justify-between">
-              <h2 className="font-bold text-foreground">후원 중인 캠페인</h2>
-              <span className="text-xs text-muted-foreground">{ACTIVE_CAMPAIGNS.length}개</span>
+              <h2 className="font-bold text-foreground">후원 중인 프로젝트</h2>
+              <span className="text-xs text-muted-foreground">{activeCampaigns.length}개</span>
             </div>
 
             <div className="flex flex-col gap-4 flex-1">
-              {ACTIVE_CAMPAIGNS.map((c) => {
+              {activeCampaigns.length === 0 && (
+                <p className="text-sm text-muted-foreground py-6 text-center">후원 중인 프로젝트가 없습니다.</p>
+              )}
+              {activeCampaigns.map((c) => {
                 const pct = Math.round((c.raised / c.goal) * 100)
                 return (
                   <div key={c.id} className="group">
@@ -430,7 +550,7 @@ export function DonorDashboardPage() {
                         href="/mission"
                         className="flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
                       >
-                        캠페인 페이지 보기 <ArrowUpRight size={11} />
+                        프로젝트 페이지 보기 <ArrowUpRight size={11} />
                       </Link>
                     </div>
                   </div>
@@ -471,7 +591,7 @@ export function DonorDashboardPage() {
                 />
                 <input
                   type="search"
-                  placeholder="캠페인 또는 선교사 검색"
+                  placeholder="프로젝트 또는 선교사 검색"
                   value={searchQuery}
                   onChange={(e) => { setSearchQuery(e.target.value); setPage(1) }}
                   className="w-full pl-8 pr-3 py-2 text-sm bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground"
@@ -546,7 +666,7 @@ export function DonorDashboardPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
-                  <th className="text-left font-semibold text-muted-foreground px-6 py-3">캠페인</th>
+                  <th className="text-left font-semibold text-muted-foreground px-6 py-3">프로젝트</th>
                   <th className="text-right font-semibold text-muted-foreground px-4 py-3">후원액</th>
                   <th className="text-center font-semibold text-muted-foreground px-4 py-3">유형</th>
                   <th className="text-left font-semibold text-muted-foreground px-4 py-3">후원일</th>
@@ -716,21 +836,22 @@ export function DonorDashboardPage() {
           )}
         </div>
 
-        {/* ── Footer ── */}
-        <footer className="border-t border-border pt-6 pb-8">
-          <div className="text-center text-xs text-muted-foreground space-y-1">
-            <p className="font-semibold text-foreground">YWAMKOREAFUND</p>
-            <p>기부금은 예수전도단 공식 계좌를 통해 100% 선교사에게 전달됩니다.</p>
-            <p>후원 문의: support@ywamkoreafund.org · 02-0000-0000</p>
-          </div>
-        </footer>
+        {!embedded && (
+          <footer className="border-t border-border pt-6 pb-8">
+            <div className="text-center text-xs text-muted-foreground space-y-1">
+              <p className="font-semibold text-foreground">YWAMKOREAFUND</p>
+              <p>기부금은 예수전도단 공식 계좌를 통해 100% 선교사에게 전달됩니다.</p>
+              <p>후원 문의: support@ywamkoreafund.org · 02-0000-0000</p>
+            </div>
+          </footer>
+        )}
       </div>
 
       {/* Receipt modal */}
       {receiptDonation && (
         <ReceiptModal
           donation={receiptDonation}
-          donor={DONOR}
+          donor={donor}
           onClose={() => setReceiptDonation(null)}
         />
       )}
