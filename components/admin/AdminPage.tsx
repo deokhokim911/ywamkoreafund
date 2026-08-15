@@ -370,59 +370,67 @@ export function AdminPage() {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      <main className="max-w-6xl mx-auto px-4 py-8 space-y-8">
+      <main className="max-w-6xl mx-auto px-4 py-6 md:py-8 space-y-6 md:space-y-8">
 
         {/* Page header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">관리자 대시보드</h1>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground">관리자 대시보드</h1>
             <p className="text-muted-foreground text-sm mt-0.5">2025년 7월 기준 — 실시간 데이터</p>
           </div>
           <Link
             href="/mission"
-            className="flex items-center gap-2 bg-primary hover:bg-[oklch(0.44_0.12_195)] text-primary-foreground text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
+            className="inline-flex items-center justify-center gap-2 bg-primary hover:bg-[oklch(0.44_0.12_195)] text-primary-foreground text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors self-start sm:self-auto"
           >
             <Plus size={15} />
             사역 추가
           </Link>
         </div>
 
-        {/* Tab nav */}
-        <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-2xl border border-border w-fit">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={cn(
-                'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all',
-                activeTab === tab.id
-                  ? 'bg-card text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              <tab.icon size={15} />
-              {tab.label}
-              {tab.count !== undefined && (
-                <span className={cn(
-                  'text-xs font-bold min-w-[20px] h-5 flex items-center justify-center rounded-full px-1.5',
-                  activeTab === tab.id ? 'bg-primary text-primary-foreground' : 'bg-border text-muted-foreground'
-                )}>
-                  {tab.count}
-                </span>
-              )}
-            </button>
-          ))}
+        {/* Tab nav — scroll on mobile, compact row on desktop */}
+        <div className="-mx-4 px-4 md:mx-0 md:px-0">
+          <div
+            role="tablist"
+            aria-label="관리자 메뉴"
+            className="flex items-center gap-1 bg-muted/60 p-1 rounded-2xl border border-border w-full md:w-fit overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {TABS.map((tab) => (
+              <button
+                key={tab.id}
+                role="tab"
+                aria-selected={activeTab === tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={cn(
+                  'flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap flex-shrink-0',
+                  activeTab === tab.id
+                    ? 'bg-card text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                <tab.icon size={15} />
+                {tab.label}
+                {tab.count !== undefined && (
+                  <span className={cn(
+                    'text-xs font-bold min-w-[20px] h-5 flex items-center justify-center rounded-full px-1.5',
+                    activeTab === tab.id ? 'bg-primary text-primary-foreground' : 'bg-border text-muted-foreground'
+                  )}>
+                    {tab.count}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* ── Tab: Dashboard ─────────────────────────────────────────────────── */}
         {activeTab === 'dashboard' && (
           <div className="space-y-8">
             {/* KPI */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
               {KPI.map((kpi) => (
-                <div key={kpi.label} className="bg-card rounded-2xl border border-border p-5 shadow-sm">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0', kpi.bg)}>
+                <div key={kpi.label} className="bg-card rounded-2xl border border-border p-3 sm:p-5 shadow-sm min-w-0">
+                  <div className="flex items-start justify-between mb-3 gap-1">
+                    <div className={cn('w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center flex-shrink-0', kpi.bg)}>
                       <kpi.icon size={18} className={kpi.color} />
                     </div>
                     {kpi.change !== 0 && (
@@ -435,7 +443,7 @@ export function AdminPage() {
                       </div>
                     )}
                   </div>
-                  <p className="text-xl font-bold text-foreground">{kpi.value}</p>
+                  <p className="text-base sm:text-xl font-bold text-foreground break-words leading-tight">{kpi.value}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">{kpi.label}</p>
                 </div>
               ))}
@@ -443,8 +451,8 @@ export function AdminPage() {
 
             {/* Charts + recent */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-              <div className="lg:col-span-2 bg-card rounded-2xl border border-border p-5 shadow-sm">
-                <div className="flex items-center justify-between mb-5">
+              <div className="lg:col-span-2 bg-card rounded-2xl border border-border p-4 sm:p-5 shadow-sm">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5">
                   <div>
                     <h2 className="font-bold text-foreground">월별 모금 현황</h2>
                     <p className="text-xs text-muted-foreground mt-0.5">2025년 1월 — 7월</p>
@@ -461,7 +469,7 @@ export function AdminPage() {
                   </div>
                 </div>
                 <ResponsiveContainer width="100%" height={220}>
-                  <AreaChart data={MONTHLY_DATA} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                  <AreaChart data={MONTHLY_DATA} margin={{ top: 4, right: 4, left: -8, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorPrimary" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="oklch(0.52 0.12 195)" stopOpacity={0.2} />
@@ -505,7 +513,7 @@ export function AdminPage() {
 
             {/* Mission table */}
             <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
-              <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+              <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border">
                 <h2 className="font-bold text-foreground">사역 목록</h2>
                 <span className="text-xs text-muted-foreground bg-muted px-2.5 py-1 rounded-full">총 {MISSIONS_TABLE.length}건</span>
               </div>
@@ -625,13 +633,13 @@ export function AdminPage() {
             </div>
 
             {/* Country bar chart */}
-            <div className="bg-card rounded-2xl border border-border p-5 shadow-sm">
+            <div className="bg-card rounded-2xl border border-border p-4 sm:p-5 shadow-sm">
               <div className="mb-5">
                 <h2 className="font-bold text-foreground">국가별 모금 현황</h2>
                 <p className="text-xs text-muted-foreground mt-0.5">현재까지 누적 금액</p>
               </div>
               <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={[{ country: '태국', amount: 4_240_000 }, { country: '캄보디아', amount: 2_100_000 }, { country: '미얀마', amount: 6_800_000 }, { country: '몽골', amount: 1_500_000 }]} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                <BarChart data={[{ country: '태국', amount: 4_240_000 }, { country: '캄보디아', amount: 2_100_000 }, { country: '미얀마', amount: 6_800_000 }, { country: '몽골', amount: 1_500_000 }]} margin={{ top: 4, right: 4, left: -8, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.91 0 0)" vertical={false} />
                   <XAxis dataKey="country" tick={{ fontSize: 12, fill: 'oklch(0.50 0 0)' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 11, fill: 'oklch(0.50 0 0)' }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v / 10_000}만`} />
@@ -658,11 +666,11 @@ export function AdminPage() {
             {/* Live preview */}
             {activeBanners.length > 0 && (
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2">
                   <h2 className="font-bold text-foreground">홈페이지 배너 미리보기</h2>
-                  <p className="text-xs text-muted-foreground">활성 슬라이드 {activeBanners.length}개</p>
+                  <p className="text-xs text-muted-foreground flex-shrink-0">활성 {activeBanners.length}개</p>
                 </div>
-                <div className="relative rounded-2xl overflow-hidden border border-border h-52 bg-primary">
+                <div className="relative rounded-2xl overflow-hidden border border-border h-44 sm:h-52 bg-primary">
                   {activeBanners[previewIndex]?.imageUrl && (
                     <Image
                       src={activeBanners[previewIndex].imageUrl}
@@ -671,9 +679,9 @@ export function AdminPage() {
                       className="object-cover opacity-30"
                     />
                   )}
-                  <div className="absolute inset-0 flex flex-col justify-end p-6">
+                  <div className="absolute inset-0 flex flex-col justify-end p-4 sm:p-6">
                     <p className="text-xs font-semibold uppercase tracking-widest text-[oklch(0.85_0.06_195)] mb-2">YWAMKOREAFUND</p>
-                    <h3 className="text-2xl font-bold text-white text-balance mb-1.5">
+                    <h3 className="text-lg sm:text-2xl font-bold text-white text-balance mb-1.5 line-clamp-2">
                       {activeBanners[previewIndex].title}
                     </h3>
                     <p className="text-white/80 text-sm line-clamp-2 mb-4">
@@ -721,14 +729,14 @@ export function AdminPage() {
             )}
 
             {/* Add new banner */}
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
                 <h2 className="font-bold text-foreground">배너 슬라이드 관리</h2>
                 <p className="text-xs text-muted-foreground mt-0.5">순서를 변경하거나 활성/비활성으로 노출 여부를 제어할 수 있습니다.</p>
               </div>
               <button
                 onClick={() => { setShowAddBanner(true); setEditingBannerId(null) }}
-                className="flex items-center gap-1.5 bg-primary hover:bg-[oklch(0.44_0.12_195)] text-primary-foreground text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
+                className="inline-flex items-center justify-center gap-1.5 bg-primary hover:bg-[oklch(0.44_0.12_195)] text-primary-foreground text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors self-start sm:self-auto"
               >
                 <Plus size={14} /> 슬라이드 추가
               </button>
@@ -751,7 +759,7 @@ export function AdminPage() {
                     'bg-card border rounded-2xl overflow-hidden shadow-sm transition-all',
                     banner.isActive ? 'border-border' : 'border-border opacity-60'
                   )}>
-                    <div className="flex items-center gap-4 p-4">
+                    <div className="flex items-start sm:items-center gap-3 sm:gap-4 p-3 sm:p-4">
                       {/* Drag handle / order */}
                       <div className="flex flex-col items-center gap-0.5 flex-shrink-0">
                         <button onClick={() => moveBanner(banner.id, 'up')} className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
@@ -764,7 +772,7 @@ export function AdminPage() {
                       </div>
 
                       {/* Thumbnail */}
-                      <div className="w-20 h-14 rounded-xl overflow-hidden bg-muted flex-shrink-0 relative">
+                      <div className="w-14 h-10 sm:w-20 sm:h-14 rounded-xl overflow-hidden bg-muted flex-shrink-0 relative">
                         {banner.imageUrl ? (
                           <Image src={banner.imageUrl} alt={banner.title} fill className="object-cover" />
                         ) : (
@@ -794,7 +802,7 @@ export function AdminPage() {
                       {/* Active toggle */}
                       <button
                         onClick={() => toggleBannerActive(banner.id)}
-                        className="flex-shrink-0"
+                        className="flex-shrink-0 self-center"
                         aria-label={banner.isActive ? '비활성화' : '활성화'}
                       >
                         {banner.isActive
@@ -803,7 +811,7 @@ export function AdminPage() {
                       </button>
 
                       {/* Actions */}
-                      <div className="flex items-center gap-1 flex-shrink-0">
+                      <div className="flex items-center gap-1 flex-shrink-0 self-center">
                         <button
                           onClick={() => { setEditingBannerId(editingBannerId === banner.id ? null : banner.id); setShowAddBanner(false) }}
                           className="p-2 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
@@ -875,7 +883,10 @@ export function AdminPage() {
                   <div className="text-center py-12 border-2 border-dashed border-border rounded-2xl">
                     <Star size={32} className="mx-auto mb-2 text-muted-foreground opacity-30" />
                     <p className="text-sm text-muted-foreground">선정된 추천 프로젝트가 없습니다.</p>
-                    <p className="text-xs text-muted-foreground mt-1">오른쪽 목록에서 프로젝트를 선택하세요.</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      <span className="lg:hidden">아래 목록에서 프로젝트를 선택하세요.</span>
+                      <span className="hidden lg:inline">오른쪽 목록에서 프로젝트를 선택하세요.</span>
+                    </p>
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -922,7 +933,7 @@ export function AdminPage() {
                     const pct = Math.round((c.currentAmount / c.goalAmount) * 100)
                     return (
                       <div key={c.id} className={cn(
-                        'flex items-center gap-3 bg-card border rounded-2xl p-3 shadow-sm transition-all',
+                        'flex items-start sm:items-center gap-3 bg-card border rounded-2xl p-3 shadow-sm transition-all',
                         c.isFeatured ? 'border-primary/30' : 'border-border'
                       )}>
                         {/* Thumb */}
@@ -951,14 +962,14 @@ export function AdminPage() {
                           onClick={() => toggleFeatured(c.id)}
                           aria-label={c.isFeatured ? '추천 해제' : '추천 지정'}
                           className={cn(
-                            'flex-shrink-0 flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl border transition-all',
+                            'flex-shrink-0 flex items-center gap-1.5 text-xs font-semibold px-2.5 sm:px-3 py-1.5 rounded-xl border transition-all self-center',
                             c.isFeatured
                               ? 'bg-[oklch(0.96_0.06_85)] border-[oklch(0.88_0.10_80)] text-[oklch(0.45_0.15_70)]'
                               : 'bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-primary'
                           )}
                         >
                           <Star size={12} className={c.isFeatured ? 'fill-[oklch(0.55_0.16_75)]' : ''} />
-                          {c.isFeatured ? '추천 중' : '추천 지정'}
+                          <span className="hidden sm:inline">{c.isFeatured ? '추천 중' : '추천 지정'}</span>
                         </button>
                       </div>
                     )
@@ -969,7 +980,7 @@ export function AdminPage() {
 
             {/* Homepage preview of featured section */}
             <div className="space-y-3 pt-2">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                 <h2 className="font-bold text-foreground">홈페이지 노출 미리보기</h2>
                 <span className="text-xs text-muted-foreground">추천 필터 선택 시 표시되는 순서</span>
               </div>

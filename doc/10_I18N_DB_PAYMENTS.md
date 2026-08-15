@@ -203,7 +203,7 @@ DonationModal
 | DB | A Supabase / B VPS 병기 | **D0부터 Supabase 기본** · Docker 선택 (B는 이력) |
 | 결제 | Toss vs Stripe 병기 | **D2 Toss 확정** · Provider로 Stripe 자리 유지 · D5 후보 |
 
-상세 작업 ID: [09](./09_DEVELOPMENT_PHASES.md).
+상세 작업 ID: [09](./09_DEVELOPMENT_PHASES.md). Toss 구현 순서: [15](./15_PG_DEVELOPMENT.md).
 
 ---
 

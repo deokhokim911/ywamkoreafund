@@ -417,11 +417,11 @@ function StageBadge({ stage }: { stage: ApprovalStage }) {
 }
 
 function StepBar({ stage }: { stage: ApprovalStage }) {
-  const steps: { key: ApprovalStage; label: string }[] = [
-    { key: 'submitted', label: '신청 접수' },
-    { key: 'handler',   label: '담당자 검토' },
-    { key: 'approver',  label: '승인자 검토' },
-    { key: 'approved',  label: '등록 완료' },
+  const steps: { key: ApprovalStage; label: string; short: string }[] = [
+    { key: 'submitted', label: '신청 접수', short: '접수' },
+    { key: 'handler',   label: '담당자 검토', short: '담당' },
+    { key: 'approver',  label: '승인자 검토', short: '승인' },
+    { key: 'approved',  label: '등록 완료', short: '완료' },
   ]
   const currentIdx = stage === 'rejected' ? -1 : STAGE_SEQUENCE.indexOf(stage)
 
@@ -448,7 +448,8 @@ function StepBar({ stage }: { stage: ApprovalStage }) {
                 'text-[10px] mt-1 text-center font-medium leading-tight whitespace-nowrap',
                 isCurrent ? 'text-primary' : isDone ? 'text-primary/70' : 'text-muted-foreground',
               )}>
-                {s.label}
+                <span className="md:hidden">{s.short}</span>
+                <span className="hidden md:inline">{s.label}</span>
               </span>
             </div>
             {i < steps.length - 1 && (
@@ -480,13 +481,13 @@ function HistoryTimeline({ entries }: { entries: HistoryEntry[] }) {
               <Icon size={12} className={am.iconColor} />
             </span>
             <div className="bg-card rounded-xl border border-border p-3 shadow-sm">
-              <div className="flex items-start justify-between gap-2 mb-1">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-2 mb-1">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-xs font-semibold text-foreground">{e.actor}</span>
                   <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded-md">{e.actorRole}</span>
                   <span className={cn('text-[10px] font-medium', am.iconColor)}>{am.label}</span>
                 </div>
-                <time className="text-[10px] text-muted-foreground whitespace-nowrap flex items-center gap-1">
+                <time className="text-[10px] text-muted-foreground sm:whitespace-nowrap flex items-center gap-1 flex-shrink-0">
                   <Clock size={10} />
                   {e.timestamp}
                 </time>
@@ -532,14 +533,14 @@ function DetailModal({
       {/* Panel */}
       <div className="relative ml-auto w-full max-w-2xl h-full bg-background flex flex-col shadow-2xl">
         {/* Header */}
-        <div className="flex items-start gap-3 px-6 py-5 border-b border-border">
+        <div className="flex items-start gap-3 px-4 sm:px-6 py-4 sm:py-5 border-b border-border">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2 mb-1 flex-wrap">
               <StageBadge stage={request.stage} />
               <span className="text-xs text-muted-foreground">{request.id}</span>
             </div>
             <h2 className="text-base font-bold text-foreground leading-snug line-clamp-2">{request.title}</h2>
-            <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
+            <div className="flex items-center gap-x-3 gap-y-1 mt-1.5 text-xs text-muted-foreground flex-wrap">
               <span className="flex items-center gap-1"><User size={11} />{request.missionary}</span>
               <span className="flex items-center gap-1"><MapPin size={11} />{request.country}</span>
               <span className="flex items-center gap-1"><Calendar size={11} />{request.submittedAt}</span>
@@ -551,7 +552,7 @@ function DetailModal({
         </div>
 
         {/* Stage progress */}
-        <div className="px-6 pt-4 pb-3 border-b border-border">
+        <div className="px-4 sm:px-6 pt-4 pb-3 border-b border-border">
           <StepBar stage={request.stage} />
           {request.stage !== 'rejected' && (
             <p className="text-xs text-muted-foreground mt-3 text-center">
@@ -584,7 +585,7 @@ function DetailModal({
         </div>
 
         {/* Scrollable body */}
-        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-5 space-y-5">
           {activeSection === 'info' && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
@@ -598,7 +599,7 @@ function DetailModal({
                 ].map(row => (
                   <div key={row.label} className="bg-muted/60 rounded-xl p-3">
                     <p className="text-[10px] text-muted-foreground mb-0.5">{row.label}</p>
-                    <p className="text-sm font-semibold text-foreground">{row.value}</p>
+                    <p className="text-sm font-semibold text-foreground break-all">{row.value}</p>
                   </div>
                 ))}
               </div>
@@ -631,7 +632,7 @@ function DetailModal({
 
         {/* Action footer */}
         {canAct && (
-          <div className="border-t border-border px-6 py-4 space-y-3 bg-card">
+          <div className="border-t border-border px-4 sm:px-6 py-4 space-y-3 bg-card pb-[max(1rem,env(safe-area-inset-bottom))]">
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="text-[11px] font-medium text-muted-foreground mb-1 block">처리자 이름</label>
@@ -660,25 +661,25 @@ function DetailModal({
                 className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-background resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <button
                 disabled={!comment.trim() || !actor.trim()}
                 onClick={() => { onAction(request.id, 'comment', comment, actor, currentStageLabel); setComment(''); setActor('') }}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium border border-border text-foreground hover:bg-muted transition-colors disabled:opacity-40"
+                className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-sm font-medium border border-border text-foreground hover:bg-muted transition-colors disabled:opacity-40"
               >
                 <MessageSquare size={14} /> 의견 등록
               </button>
               <button
                 disabled={!comment.trim() || !actor.trim()}
                 onClick={() => { onAction(request.id, 'reject', comment, actor, currentStageLabel); onClose() }}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20 transition-colors disabled:opacity-40"
+                className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-sm font-medium bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20 transition-colors disabled:opacity-40"
               >
                 <XCircle size={14} /> 반려
               </button>
               <button
                 disabled={!comment.trim() || !actor.trim()}
                 onClick={() => { onAction(request.id, 'approve', comment, actor, currentStageLabel); onClose() }}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold bg-primary text-primary-foreground hover:bg-[oklch(0.44_0.12_195)] transition-colors disabled:opacity-40 ml-auto"
+                className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold bg-primary text-primary-foreground hover:bg-[oklch(0.44_0.12_195)] transition-colors disabled:opacity-40 sm:ml-auto w-full sm:w-auto justify-center"
               >
                 {request.stage === 'approver' ? (
                   <><CheckCircle2 size={14} /> 승인 및 등록</>
@@ -714,7 +715,7 @@ function ApprovalKPI({ requests }: { requests: CampaignRequest[] }) {
       {kpis.map(k => {
         const Icon = k.icon
         return (
-          <div key={k.label} className={cn('rounded-2xl p-4 flex items-center gap-3 border border-border', k.bg)}>
+          <div key={k.label} className={cn('rounded-2xl p-3 sm:p-4 flex items-center gap-2 sm:gap-3 border border-border min-w-0', k.bg)}>
             <div className="w-9 h-9 rounded-xl bg-card flex items-center justify-center shadow-sm border border-border flex-shrink-0">
               <Icon size={18} className={k.color} />
             </div>
@@ -901,8 +902,8 @@ export function CampaignApprovalTab() {
             className="w-full pl-9 pr-4 py-2.5 text-sm border border-border rounded-xl bg-card focus:outline-none focus:ring-2 focus:ring-primary/30"
           />
         </div>
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <Filter size={13} className="text-muted-foreground mr-1" />
+        <div className="flex items-center gap-1.5 flex-wrap w-full sm:w-auto">
+          <Filter size={13} className="text-muted-foreground mr-1 flex-shrink-0" />
           {FILTER_OPTIONS.map(f => (
             <button
               key={f.value}
@@ -939,15 +940,15 @@ export function CampaignApprovalTab() {
           return (
             <div key={req.id} className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
               {/* Row header */}
-              <div className="flex items-center gap-4 px-5 py-4">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 px-4 sm:px-5 py-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <StageBadge stage={req.stage} />
                     <span className="text-[11px] text-muted-foreground">{req.id}</span>
                     <span className="text-[11px] text-muted-foreground hidden sm:inline">접수: {req.submittedAt}</span>
                   </div>
-                  <p className="text-sm font-semibold text-foreground leading-snug line-clamp-1">{req.title}</p>
-                  <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                  <p className="text-sm font-semibold text-foreground leading-snug line-clamp-2 sm:line-clamp-1">{req.title}</p>
+                  <div className="flex items-center gap-x-3 gap-y-1 mt-1 text-xs text-muted-foreground flex-wrap">
                     <span className="flex items-center gap-1"><User size={11} />{req.missionary}</span>
                     <span className="flex items-center gap-1"><MapPin size={11} />{req.country}</span>
                     <span className="flex items-center gap-1"><Target size={11} />₩ {req.goalAmount.toLocaleString()}</span>
@@ -976,11 +977,12 @@ export function CampaignApprovalTab() {
                   })}
                 </div>
 
-                <div className="flex items-center gap-1.5 flex-shrink-0">
+                <div className="flex items-center gap-1.5 flex-shrink-0 self-end sm:self-auto">
                   <button
                     onClick={() => toggleExpand(req.id)}
                     className="p-2 rounded-xl hover:bg-muted transition-colors text-muted-foreground"
                     title="이력 펼치기"
+                    aria-label="이력 펼치기"
                   >
                     {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                   </button>
@@ -994,18 +996,20 @@ export function CampaignApprovalTab() {
               </div>
 
               {/* Inline step bar */}
-              <div className="px-5 pb-3 pt-1 border-t border-border/50 bg-muted/30">
+              <div className="px-4 sm:px-5 pb-3 pt-1 border-t border-border/50 bg-muted/30">
                 <StepBar stage={req.stage} />
               </div>
 
               {/* Collapsed quick-history */}
               {!isExpanded && lastEntry && (
-                <div className="px-5 pb-3 flex items-start gap-2 text-xs text-muted-foreground">
-                  <span className="mt-0.5 flex-shrink-0">
-                    {(() => { const am = ACTION_META[lastEntry.action]; const Icon = am.icon; return <Icon size={12} className={am.iconColor} /> })()}
-                  </span>
-                  <p className="line-clamp-1">{lastEntry.comment || '— 의견 없음'}</p>
-                  <time className="ml-auto whitespace-nowrap">{lastEntry.timestamp}</time>
+                <div className="px-4 sm:px-5 pb-3 flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-2 text-xs text-muted-foreground">
+                  <div className="flex items-start gap-2 min-w-0">
+                    <span className="mt-0.5 flex-shrink-0">
+                      {(() => { const am = ACTION_META[lastEntry.action]; const Icon = am.icon; return <Icon size={12} className={am.iconColor} /> })()}
+                    </span>
+                    <p className="line-clamp-2 sm:line-clamp-1">{lastEntry.comment || '— 의견 없음'}</p>
+                  </div>
+                  <time className="sm:ml-auto whitespace-nowrap pl-6 sm:pl-0">{lastEntry.timestamp}</time>
                 </div>
               )}
 

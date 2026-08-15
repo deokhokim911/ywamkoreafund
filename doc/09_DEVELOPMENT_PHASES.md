@@ -3,7 +3,7 @@
 > **기준:** 현재 워크스페이스 UI 프로토타입 (`app/`, `components/`)  
 > **전제:** DB·Auth·실결제 미연동 — 화면·플로우는 존재  
 > **플랫폼 결정:** [10](./10_I18N_DB_PAYMENTS.md) — **결제 Phase1=Toss · DB 호스팅=Supabase** (대안 비교는 10에 보존)  
-> **관련:** [08](./08_UI_PROTOTYPE_PLAN.md) · [05](./05_PHASE_ROADMAP.md) · [04](./04_FEATURE_SPEC.md) · [03](./03_DATA_MODEL.md) · [01](./01_TECH_STACK.md)  
+> **관련:** [08](./08_UI_PROTOTYPE_PLAN.md) · [05](./05_PHASE_ROADMAP.md) · [04](./04_FEATURE_SPEC.md) · [03](./03_DATA_MODEL.md) · [01](./01_TECH_STACK.md) · [15](./15_PG_DEVELOPMENT.md) (Toss 구현)  
 > **작성일:** 2026-07-21 · **개정:** 2026-08-09 (고객 일정 v7 매핑 — [13](./13_CUSTOMER_SCHEDULE_MILESTONE_v7.md))  
 > **독자:** 구현 담당 (프론트·풀스택)
 
@@ -263,6 +263,8 @@ Docker는 선택. Stripe는 stub (D5 후보).
 | D2-B6 | mock store 제거 또는 `USE_MOCK=false` 기본 | — |
 
 #### D2-C 결제 — Toss + Provider 추상화 (약 2주)
+
+> **구현 SSOT:** [15_PG_DEVELOPMENT.md](./15_PG_DEVELOPMENT.md) (PG-0~PG-4). 공식 API: [Toss 코어 레퍼런스](https://docs.tosspayments.com/reference).
 
 | ID | 작업 | UI |
 |----|------|-----|

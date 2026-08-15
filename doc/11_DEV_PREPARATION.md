@@ -165,7 +165,7 @@ flowchart LR
 7. 테스트 카드 번호·시나리오(성공/실패) 북마크  
 8. **라이브 전환**은 D4 — 심사·실명·정산 계좌는 고객·법무
 
-참고: `doc/YWAMFund_PG_분석_연동가이드.docx` (팀 PG 분석 자료)
+참고: [15_PG_DEVELOPMENT.md](./15_PG_DEVELOPMENT.md) (단계별 구현) · `doc/YWAMFund_PG_분석_연동가이드.docx` (선정 근거 · 코드 예시는 구식)
 
 ### 5.2 체크리스트
 
@@ -397,8 +397,9 @@ Phase 0에서 `doc/ENV_YWAMFUND_PHASE0.md`로 확장한다.
 | [10](./10_I18N_DB_PAYMENTS.md) | Toss·Supabase 확정 |
 | [07](./07_CUSTOMER_QUESTIONS.md) | 고객 질문 |
 | [14](./14_CUSTOMER_INFO_REQUEST.md) | **고객 준비·제공 요청서** (회신용) |
+| [15](./15_PG_DEVELOPMENT.md) | **Toss PG 단계별 개발** |
 | [06](./06_OPEN_QUESTIONS.md) | 팀 결정 (T-*) |
-| PG 연동 docx | Toss 상세 참고 |
+| PG 연동 docx | 선정 근거 (구현은 15) |
 
 ---
 

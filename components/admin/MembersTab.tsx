@@ -666,7 +666,7 @@ export function MembersTab() {
   return (
     <div className="space-y-6">
       {/* Sub-tab toggle */}
-      <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-2xl border border-border w-fit">
+      <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-2xl border border-border w-full sm:w-fit">
         {([
           { id: 'missionary', label: '선교사 관리', icon: Globe },
           { id: 'donor',      label: '후원자 관리', icon: Heart },
@@ -675,7 +675,7 @@ export function MembersTab() {
             key={t.id}
             onClick={() => setMemberView(t.id)}
             className={cn(
-              'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all',
+              'flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all flex-1 sm:flex-none',
               memberView === t.id ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
             )}
           >
@@ -689,13 +689,13 @@ export function MembersTab() {
       {memberView === 'missionary' && (
         <div className="space-y-5">
           {/* KPI */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
             {mKpis.map((k) => (
-              <div key={k.label} className="bg-card rounded-2xl border border-border p-4 shadow-sm">
+              <div key={k.label} className="bg-card rounded-2xl border border-border p-3 sm:p-4 shadow-sm min-w-0">
                 <div className={cn('w-8 h-8 rounded-xl flex items-center justify-center mb-3', k.bg)}>
                   <k.icon size={16} className="text-primary" />
                 </div>
-                <p className="text-lg font-bold text-foreground">{k.value}</p>
+                <p className="text-base sm:text-lg font-bold text-foreground break-words leading-tight">{k.value}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">{k.label}</p>
               </div>
             ))}
@@ -712,14 +712,14 @@ export function MembersTab() {
                 className="w-full pl-9 pr-3 py-2.5 text-sm bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground"
               />
             </div>
-            <div className="flex gap-2">
-              <div className="flex gap-1 bg-muted/60 p-1 rounded-xl border border-border">
+            <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex gap-1 bg-muted/60 p-1 rounded-xl border border-border overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {(['all', 'active', 'pending', 'inactive'] as const).map((s) => (
                   <button
                     key={s}
                     onClick={() => { setMStatus(s); setMPage(1) }}
                     className={cn(
-                      'px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors',
+                      'px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap flex-shrink-0',
                       mStatus === s ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
                     )}
                   >
@@ -734,7 +734,7 @@ export function MembersTab() {
               </div>
               <button
                 onClick={openAddMissionary}
-                className="flex items-center gap-1.5 bg-primary text-primary-foreground text-sm font-semibold px-4 py-2 rounded-xl hover:bg-[oklch(0.44_0.12_195)] transition-colors flex-shrink-0"
+                className="flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-sm font-semibold px-4 py-2 rounded-xl hover:bg-[oklch(0.44_0.12_195)] transition-colors flex-shrink-0"
               >
                 <Plus size={15} /> 선교사 추가
               </button>
@@ -746,7 +746,7 @@ export function MembersTab() {
             <div className="px-5 py-3.5 border-b border-border flex items-center justify-between">
               <p className="text-sm text-muted-foreground">총 <strong className="text-foreground">{filteredM.length}명</strong></p>
             </div>
-            <div className="overflow-x-auto">
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border bg-muted/40">
@@ -895,6 +895,107 @@ export function MembersTab() {
                 </tbody>
               </table>
             </div>
+            <div className="md:hidden divide-y divide-border">
+              {mPageData.map((m) => (
+                <div key={m.id} className="p-4 space-y-3">
+                  <button
+                    type="button"
+                    onClick={() => setMDashTarget(m)}
+                    className="w-full text-left"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center flex-shrink-0">
+                          <span className="text-xs font-bold text-primary">{m.name[0]}</span>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-semibold text-foreground">{m.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">{m.email}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">{m.country} · {m.joinedAt}</p>
+                        </div>
+                      </div>
+                      <span className={cn('text-xs font-semibold px-2.5 py-1 rounded-full flex-shrink-0', M_STATUS_COLOR[m.status])}>
+                        {M_STATUS_LABEL[m.status]}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
+                      <span>모금 <strong className="text-primary">{formatKRW(m.totalRaised)}</strong></span>
+                      <span>후원자 {m.donorCount.toLocaleString()}명</span>
+                    </div>
+                  </button>
+                  <div className="flex items-center justify-end gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setMDashTarget(m)}
+                      className="p-2 rounded-lg hover:bg-muted text-muted-foreground"
+                      aria-label="대시보드 보기"
+                    >
+                      <Eye size={15} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => openEditMissionary(m)}
+                      className="p-2 rounded-lg hover:bg-muted text-muted-foreground"
+                      aria-label="수정"
+                    >
+                      <Pencil size={15} />
+                    </button>
+                    <RowActionMenu
+                      open={mOpenMenu === `mobile-${m.id}`}
+                      onClose={() => setMOpenMenu(null)}
+                      trigger={
+                        <button
+                          type="button"
+                          onClick={() => setMOpenMenu(mOpenMenu === `mobile-${m.id}` ? null : `mobile-${m.id}`)}
+                          className="p-2 rounded-lg hover:bg-muted text-muted-foreground"
+                          aria-label="더보기"
+                          aria-expanded={mOpenMenu === `mobile-${m.id}`}
+                        >
+                          <MoreHorizontal size={15} />
+                        </button>
+                      }
+                    >
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => { setMDashTarget(m); setMOpenMenu(null) }}
+                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-foreground hover:bg-muted"
+                      >
+                        <Eye size={13} /> 대시보드 보기
+                      </button>
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => { openEditMissionary(m); setMOpenMenu(null) }}
+                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-foreground hover:bg-muted"
+                      >
+                        <Pencil size={13} /> 정보 수정
+                      </button>
+                      {m.status === 'pending' && (
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => { approveMissionary(m.id); setMOpenMenu(null) }}
+                          className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[oklch(0.38_0.12_165)] hover:bg-muted"
+                        >
+                          <CheckCircle size={13} /> 승인하기
+                        </button>
+                      )}
+                      {m.status !== 'inactive' && (
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => { setMConfirmTarget(m); setMOpenMenu(null) }}
+                          className="flex items-center gap-2 w-full px-3 py-2 text-sm text-destructive hover:bg-muted"
+                        >
+                          <UserX size={13} /> 비활성화
+                        </button>
+                      )}
+                    </RowActionMenu>
+                  </div>
+                </div>
+              ))}
+            </div>
             <div className="px-5 py-3 border-t border-border flex items-center justify-between">
               <p className="text-xs text-muted-foreground">{mPage} / {mTotalPages} 페이지</p>
               <div className="flex gap-1">
@@ -914,13 +1015,13 @@ export function MembersTab() {
       {memberView === 'donor' && (
         <div className="space-y-5">
           {/* KPI */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
             {dKpis.map((k) => (
-              <div key={k.label} className="bg-card rounded-2xl border border-border p-4 shadow-sm">
+              <div key={k.label} className="bg-card rounded-2xl border border-border p-3 sm:p-4 shadow-sm min-w-0">
                 <div className={cn('w-8 h-8 rounded-xl flex items-center justify-center mb-3', k.bg)}>
                   <k.icon size={16} className="text-primary" />
                 </div>
-                <p className="text-lg font-bold text-foreground">{k.value}</p>
+                <p className="text-base sm:text-lg font-bold text-foreground break-words leading-tight">{k.value}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">{k.label}</p>
               </div>
             ))}
@@ -937,14 +1038,14 @@ export function MembersTab() {
                 className="w-full pl-9 pr-3 py-2.5 text-sm bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground"
               />
             </div>
-            <div className="flex gap-2">
-              <div className="flex gap-1 bg-muted/60 p-1 rounded-xl border border-border">
+            <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex gap-1 bg-muted/60 p-1 rounded-xl border border-border overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {(['all', 'active', 'paused', 'inactive'] as const).map((s) => (
                   <button
                     key={s}
                     onClick={() => { setDStatus(s); setDPage(1) }}
                     className={cn(
-                      'px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors',
+                      'px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap flex-shrink-0',
                       dStatus === s ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
                     )}
                   >
@@ -959,7 +1060,7 @@ export function MembersTab() {
               </div>
               <button
                 onClick={openAddDonor}
-                className="flex items-center gap-1.5 bg-primary text-primary-foreground text-sm font-semibold px-4 py-2 rounded-xl hover:bg-[oklch(0.44_0.12_195)] transition-colors flex-shrink-0"
+                className="flex items-center justify-center gap-1.5 bg-primary text-primary-foreground text-sm font-semibold px-4 py-2 rounded-xl hover:bg-[oklch(0.44_0.12_195)] transition-colors flex-shrink-0"
               >
                 <Plus size={15} /> 후원자 추가
               </button>
@@ -971,7 +1072,7 @@ export function MembersTab() {
             <div className="px-5 py-3.5 border-b border-border">
               <p className="text-sm text-muted-foreground">총 <strong className="text-foreground">{filteredD.length}명</strong></p>
             </div>
-            <div className="overflow-x-auto">
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border bg-muted/40">
@@ -1128,6 +1229,98 @@ export function MembersTab() {
                   ))}
                 </tbody>
               </table>
+            </div>
+            <div className="md:hidden divide-y divide-border">
+              {dPageData.map((d) => (
+                <div key={d.id} className="p-4 space-y-3">
+                  <button
+                    type="button"
+                    onClick={() => setDDashTarget(d)}
+                    className="w-full text-left"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center flex-shrink-0">
+                          <span className="text-xs font-bold text-primary">{d.name[0]}</span>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-semibold text-foreground">{d.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">{d.email}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">최근 {d.lastDonation}</p>
+                        </div>
+                      </div>
+                      <span className={cn('text-xs font-semibold px-2.5 py-1 rounded-full flex-shrink-0', D_STATUS_COLOR[d.status])}>
+                        {D_STATUS_LABEL[d.status]}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-3 text-xs text-muted-foreground">
+                      <span>총 <strong className="text-primary">{formatKRW(d.totalAmount)}</strong></span>
+                      <span>{d.donationCount}회</span>
+                      <span>정기 {d.regularAmount ? formatKRW(d.regularAmount) : '—'}</span>
+                    </div>
+                  </button>
+                  <div className="flex items-center justify-end gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setDDashTarget(d)}
+                      className="p-2 rounded-lg hover:bg-muted text-muted-foreground"
+                      aria-label="대시보드 보기"
+                    >
+                      <Eye size={15} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => openEditDonor(d)}
+                      className="p-2 rounded-lg hover:bg-muted text-muted-foreground"
+                      aria-label="수정"
+                    >
+                      <Pencil size={15} />
+                    </button>
+                    <RowActionMenu
+                      open={dOpenMenu === `mobile-${d.id}`}
+                      onClose={() => setDOpenMenu(null)}
+                      trigger={
+                        <button
+                          type="button"
+                          onClick={() => setDOpenMenu(dOpenMenu === `mobile-${d.id}` ? null : `mobile-${d.id}`)}
+                          className="p-2 rounded-lg hover:bg-muted text-muted-foreground"
+                          aria-label="더보기"
+                          aria-expanded={dOpenMenu === `mobile-${d.id}`}
+                        >
+                          <MoreHorizontal size={15} />
+                        </button>
+                      }
+                    >
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => { setDDashTarget(d); setDOpenMenu(null) }}
+                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-foreground hover:bg-muted"
+                      >
+                        <Eye size={13} /> 대시보드 보기
+                      </button>
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => { openEditDonor(d); setDOpenMenu(null) }}
+                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-foreground hover:bg-muted"
+                      >
+                        <Pencil size={13} /> 정보 수정
+                      </button>
+                      {d.status !== 'inactive' && (
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => { setDConfirmTarget(d); setDOpenMenu(null) }}
+                          className="flex items-center gap-2 w-full px-3 py-2 text-sm text-destructive hover:bg-muted"
+                        >
+                          <UserX size={13} /> 비활성화
+                        </button>
+                      )}
+                    </RowActionMenu>
+                  </div>
+                </div>
+              ))}
             </div>
             <div className="px-5 py-3 border-t border-border flex items-center justify-between">
               <p className="text-xs text-muted-foreground">{dPage} / {dTotalPages} 페이지</p>

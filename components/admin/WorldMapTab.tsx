@@ -138,18 +138,18 @@ export function WorldMapTab() {
     <div className="space-y-8">
 
       {/* KPI strip */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         {[
           { label: '파송 선교사', value: `${TOTAL_MISSIONARIES}명`,   icon: Users,      bg: 'bg-accent' },
           { label: '사역 국가',   value: `${ALL_COUNTRIES.length}개국`, icon: Globe,      bg: 'bg-accent' },
           { label: '활성 국가',   value: `${ACTIVE_COUNTRIES}개국`,    icon: Heart,      bg: 'bg-accent' },
           { label: '총 누적 모금',value: formatKRW(TOTAL_AMOUNT),      icon: TrendingUp, bg: 'bg-accent' },
         ].map((k) => (
-          <div key={k.label} className="bg-card rounded-2xl border border-border p-5 shadow-sm">
-            <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center mb-3', k.bg)}>
+          <div key={k.label} className="bg-card rounded-2xl border border-border p-3 sm:p-5 shadow-sm min-w-0">
+            <div className={cn('w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center mb-3', k.bg)}>
               <k.icon size={18} className="text-primary" />
             </div>
-            <p className="text-xl font-bold text-foreground">{k.value}</p>
+            <p className="text-base sm:text-xl font-bold text-foreground break-words leading-tight">{k.value}</p>
             <p className="text-xs text-muted-foreground mt-0.5">{k.label}</p>
           </div>
         ))}
@@ -159,12 +159,16 @@ export function WorldMapTab() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Map */}
         <div className="lg:col-span-2 bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
-          <div className="px-5 pt-5 pb-3 flex items-center justify-between">
-            <div>
+          <div className="px-4 sm:px-5 pt-4 sm:pt-5 pb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
               <h2 className="font-bold text-foreground">국가별 사역 지도</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">색상이 짙을수록 누적 모금액이 높습니다. 나라에 마우스를 올리면 국명이 표시됩니다.</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                색상이 짙을수록 누적 모금액이 높습니다.
+                <span className="hidden sm:inline"> 나라에 마우스를 올리면 국명이 표시됩니다.</span>
+                <span className="sm:hidden"> 나라를 누르면 상세가 표시됩니다.</span>
+              </p>
             </div>
-            <div className="flex gap-2 items-center flex-wrap justify-end">
+            <div className="flex gap-2 items-center flex-wrap sm:justify-end">
               {[
                 { color: 'oklch(0.82 0.06 195)', label: '준비중' },
                 { color: 'oklch(0.58 0.12 195)', label: '활성' },
@@ -371,8 +375,8 @@ export function WorldMapTab() {
       </div>
 
       {/* Bar chart */}
-      <div className="bg-card rounded-2xl border border-border p-5 shadow-sm">
-        <div className="flex items-center justify-between mb-5">
+      <div className="bg-card rounded-2xl border border-border p-4 sm:p-5 shadow-sm">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5">
           <div>
             <h2 className="font-bold text-foreground">국가별 비교</h2>
             <p className="text-xs text-muted-foreground mt-0.5">전체 {ALL_COUNTRIES.length}개국</p>
@@ -393,7 +397,7 @@ export function WorldMapTab() {
           </div>
         </div>
         <ResponsiveContainer width="100%" height={220}>
-          <BarChart data={BAR_DATA} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+          <BarChart data={BAR_DATA} margin={{ top: 4, right: 4, left: -8, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.91 0 0)" vertical={false} />
             <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'oklch(0.50 0 0)' }} axisLine={false} tickLine={false} />
             <YAxis
@@ -424,11 +428,11 @@ export function WorldMapTab() {
 
       {/* Country table */}
       <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+        <div className="px-4 sm:px-6 py-4 border-b border-border flex items-center justify-between gap-2">
           <h2 className="font-bold text-foreground">국가별 사역 현황 목록</h2>
-          <span className="text-xs text-muted-foreground bg-muted px-2.5 py-1 rounded-full">총 {ALL_COUNTRIES.length}개국</span>
+          <span className="text-xs text-muted-foreground bg-muted px-2.5 py-1 rounded-full flex-shrink-0">총 {ALL_COUNTRIES.length}개국</span>
         </div>
-        <div className="overflow-x-auto">
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/40">
@@ -467,6 +471,35 @@ export function WorldMapTab() {
               ))}
             </tbody>
           </table>
+        </div>
+        <div className="md:hidden divide-y divide-border">
+          {sortedCountries.map(([nameEn, d]) => (
+            <button
+              key={nameEn}
+              type="button"
+              onClick={() => setSelected(nameEn === selected ? null : nameEn)}
+              className={cn(
+                'w-full text-left p-4 space-y-2 transition-colors',
+                nameEn === selected ? 'bg-accent/40' : 'hover:bg-muted/30',
+              )}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="font-semibold text-foreground">{d.nameKo}</p>
+                  <p className="text-xs text-muted-foreground">{d.nameEn}</p>
+                </div>
+                <span className={cn('text-xs font-semibold px-2.5 py-1 rounded-full flex-shrink-0', STATUS_COLOR[d.status])}>
+                  {STATUS_LABEL[d.status]}
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                <span>선교사 {d.missionaries}명</span>
+                <span>후원자 {d.donorCount.toLocaleString()}명</span>
+                <span>프로젝트 {d.campaigns}건</span>
+                <span className="font-semibold text-primary">{formatKRW(d.totalAmount)}</span>
+              </div>
+            </button>
+          ))}
         </div>
       </div>
     </div>
